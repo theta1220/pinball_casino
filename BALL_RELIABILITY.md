@@ -1,0 +1,13 @@
+# Ball reliability and first-paint loading
+
+## Reproduced defects and corrections
+- Old rain handoff x370..700 at y250 enabled collision inside slot in31/34 sampled positions. At x470 the repair displaced the ball about94px upwards; independent x370 fixture stayed near(330.93,221.36) after8s/3nudges. Rain now enters side corridors x195..230 or715..755 and enables physics at y300 only with full-radius clearance. Same identity/source/stake remains.
+- Shooter mouths were open to free balls. Added two traced mouth rails; guided GO still follows its existing constrained path. Existing lane occupant(880,700) is returned to a clearance-validated portal as the SAME ball, without refund/charge/award. Captured roulette owner and intended drains are excluded.
+- Lower-zone recovery was reset whenever automatic flippers pulsed. Removed that suppression. Failed nudges retain their origin across small oscillations; after two failed attempts the same ball returns to a safe portal. History resets after120px meaningful escape. The reproduced concave pocket escapes within6seconds in the deterministic fixture. Relocations clear trails and record a bounded in-memory reason; no persistent/private telemetry.
+- Tests cover100 rain handoffs, diagonal gate normal reflection,3 GO seeds, x1/x5/x500 lane recovery with exact accounting, captured exclusion and30s multiball rain. Thirty-second fixture: peak12,27rain launches; no nonfinite state/pair contacts. Frequent recovery in this stress fixture remains a design-quality limitation, not proof of human enjoyment.
+
+## Startup
+Critical inline CSS suppresses placeholder DOM and canvas from first paint. Intentional accessible indeterminate loading status is visible until all required artwork and a complete WebGL UI draw are ready. Delayed/error/loss states have deliberate status and reload; no fictitious progress percentage. Browser testing found and fixed native timer receiver binding missed by mock tests. A controlled5second delayed game-module fixture showed the indicator, then ready state. Context restoration preserves economy and one canvas.
+
+## Limits
+No actual iPhone heat, touch gesture or physical safe-inset measurement. Automated desktop RAF is not a guarantee of sustained60FPS. Offline embedding/static checks and HTTP standalone smoke tests are distinct from direct file://, which remains untested due the existing denied route. Background visual evidence and reference-pixel allocation are in BACKGROUND_SAFE_AREA.md. Rain itself was previously deployed78a3b4a; current reliability/loader/background require the final successful deployment.
