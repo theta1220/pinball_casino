@@ -48,6 +48,8 @@ class PinballAudio {
     if(name==='flipper'){this.tone(190,.065,.13,'triangle',0,65,pan);this.tone(1100,.024,.035,'square',0,300,pan);}
     else if(name==='wall')this.tone(540,.07,.07*a,'triangle',0,230,pan);
     else if(name==='reel-stop'){this.tone(140,.07,.13,'triangle',0,60,pan);this.tone(1500,.07,.035,'sine',0,900,pan);}
+    else if(name==='roulette-win'){[523,659,784,1047].forEach((f,i)=>this.tone(f,.23,.11,'triangle',i*.07,f,pan));}
+    else if(name==='roulette-lose'){[294,220,147].forEach((f,i)=>this.tone(f,.22,.10,'triangle',i*.09,f*.96,pan));}
     else if(name==='collect'){[784,1047,1319].forEach((f,i)=>this.tone(f,.16,.055,'sine',i*.055,f,pan));}
     else if(name==='bumper'){this.tone(220,.12,.14*a,'sine',0,95,pan);this.tone(880,.15,.07*a,'triangle',.008,660,pan);}
     else if(name==='launch'){this.charge(0,false);this.tone(130,.25,.18,'triangle',0,600,pan);this.tone(1400,.08,.04,'sine',0,400,pan);}

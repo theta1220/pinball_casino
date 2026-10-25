@@ -8,6 +8,7 @@ require('./audio.js');
 (async()=>{
  const a=new PinballAudio();assert.equal(a.enabled,true);assert.equal(a.ctx,undefined);assert.equal(a.sfxLevel,.85);const curve=PinballAudio.ceilingCurve();assert(Math.max(...curve)<.725);assert(Math.min(...curve)>-.725);await a.enable(true);assert(a.music.playing);assert.equal(a.sfx.gain.value,1.7);assert.equal(contexts,1);
  for(let i=0;i<80;i++){a.ctx.currentTime+=.1;a.cue('bumper');}assert(a.voices.size<=18);
+ const originalTone=a.tone,notes=[];a.tone=(...v)=>notes.push(v);a.cue('roulette-win');assert.deepEqual(notes.map(v=>v[0]),[523,659,784,1047]);notes.length=0;a.cue('roulette-lose');assert.deepEqual(notes.map(v=>v[0]),[294,220,147]);notes.length=0;a.paused=true;a.cue('roulette-win');assert.equal(notes.length,0);a.paused=false;a.enabled=false;a.cue('roulette-lose');assert.equal(notes.length,0);a.enabled=true;a.tone=originalTone;
  a.charge(.4,true);const first=a.charger;a.charge(.8,true);assert.equal(a.charger,first);
  a.pause(true);assert.equal(a.charger,null);assert.equal(a.voices.size,0);assert.equal(a.music.playing,false);
  a.pause(false);await Promise.resolve();await Promise.resolve();assert(a.music.playing);assert.equal(contexts,1);
