@@ -1,0 +1,8 @@
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');require('./physics.js');const gl=new Proxy({},{get:(_,k)=>k==='getShaderParameter'?()=>true:()=>({})}),els={};const el=id=>els[id]??={value:'25',style:{setProperty(){}},setAttribute(){},querySelector:()=>({}),getContext:()=>gl};const c={PinballPhysics,document:{getElementById:el,querySelector:el},window:{addEventListener(){}},localStorage:{getItem(){},setItem(){}},performance:{now:()=>0},requestAnimationFrame(){},console,Math,assert};vm.createContext(c);
+vm.runInContext(fs.readFileSync('rules.js','utf8')+'\n'+fs.readFileSync('game.js','utf8')+`
+start();launchChoice();for(let i=0;i<2400&&state==='launch';i++)physics(1/240);
+assert.equal(state,'ready');assert.equal(balls,10);assert.equal(score,0);assert($('launchHint').textContent.includes('Increase the selected power'));assert($('launchHint').textContent.includes('25%'));updatePresentation(3);assert.equal($('toast').textContent,'');assert($('launchHint').textContent.includes('Increase the selected power'));
+beginCharge();charge=.25;ball.y=1267.5;launch();for(let i=0;i<2400&&state==='launch';i++)physics(1/240);assert($('launchHint').textContent.includes('Hold longer'));assert(!$('launchHint').textContent.includes('Increase the selected power'));
+$('launchPowerChoice').value='75';launchChoice();assert(!$('launchHint').textContent.includes('Last launch'));start();assert(!$('launchHint').textContent.includes('Last launch'));assert.equal(score,0);assert.equal(balls,10);
+console.log('PASS mode-specific persistent return guidance, no reward/ball cost, transient toast expiry, success/restart clearing');
+`,c);

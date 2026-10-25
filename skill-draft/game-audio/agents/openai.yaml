@@ -1,0 +1,4 @@
+interface:
+  display_name: "ゲームサウンド"
+  short_description: "効果音とBGMの設計・ミックス・同期・停止処理を磨く"
+  default_prompt: "$game-audio を使い、ゲームの効果音とBGMを実装し、試聴と再生状態の検証で調整してください。"

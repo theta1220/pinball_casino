@@ -1,0 +1,176 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Noto+Sans+JP:wght@400;600;800&display=swap');
+:root{color-scheme:dark;--gold:#e6bd70;--muted:#9b9c91}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 30%,#143b32 0,#091b18 50%,#060e0d 100%);color:#f7ecd6;font-family:'Noto Sans JP',sans-serif;min-height:100vh}body:before{content:'';position:fixed;inset:18px;border:1px solid #b2944c24;pointer-events:none}main{max-width:1450px;margin:auto;display:grid;grid-template-columns:1fr minmax(330px,460px) 1fr;gap:55px;align-items:center;min-height:100vh;padding:24px 55px}.eyebrow{font-size:9px;letter-spacing:2.5px;color:var(--gold)}h1{font:700 76px/.85 'Cormorant Garamond',Georgia,serif;letter-spacing:-2px;margin:30px 0 22px}h1 span{color:var(--gold)}.subtitle{font-size:10px;color:var(--gold);white-space:pre}p{font-size:12px;line-height:2;color:#b5c2b7}.intro>p{margin:30px 0}.rule{display:flex;gap:15px;font-size:10px;align-items:center;margin:20px 0}.rule b{font:italic 20px Georgia;color:var(--gold)}.keys{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:35px 0 20px}.keys span{font-size:9px;margin-right:10px;color:var(--muted)}kbd{border:1px solid #c1ae7740;border-radius:4px;padding:4px 7px;font:10px monospace;color:#d3c6a6}small{font-size:8px;color:#87978a}.machine{border:1px solid #c89b535c;border-radius:17px;overflow:hidden;background:#091713;box-shadow:0 25px 90px #0009,0 0 40px #d9ad4810}header{height:73px;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(#182820,#0a1813)}label{display:block;font-size:8px;letter-spacing:2px;color:var(--gold);margin-bottom:5px}header strong{font:24px Georgia;letter-spacing:2px}.brand{font:35px Georgia;color:var(--gold)}.right{text-align:right}.table{position:relative;aspect-ratio:941/1672;max-height:calc(100vh - 172px);margin:auto}canvas{width:100%;height:100%;display:block}.overlay{position:absolute;inset:0;background:linear-gradient(#04141066,#041410ec 65%,#041410d9);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}.overlay[hidden]{display:none}.crest{font:70px Georgia;color:var(--gold);margin-bottom:20px}h2{font:32px/1.2 'Cormorant Garamond',Georgia,serif}.overlay h2{font:600 22px 'Noto Sans JP';margin:20px 0 0}.overlay p{font-size:11px}.overlay small{margin-top:20px;font-size:7px;letter-spacing:1.5px}button{cursor:pointer;font:inherit;color:inherit;border:0}#start{background:linear-gradient(120deg,#f1d393,#bb8b3d);color:#1e241a;border-radius:5px;padding:16px 24px;margin-top:20px;font-size:12px;font-weight:800;box-shadow:0 4px 22px #d7ac4033}#start span{margin-left:25px}footer{height:58px;display:flex;gap:12px;align-items:center;padding:8px 17px}footer label{font-size:7px}#balls{color:var(--gold);font-size:12px;letter-spacing:4px}footer button{background:#ffffff08;border:1px solid #bca66a33;border-radius:4px;padding:8px;font-size:9px}#launch{margin-left:auto}#launch kbd{border:0;font-size:8px;padding:0 0 0 6px}.details h2{font-size:36px;margin:20px 0 35px}.details em{color:var(--gold)}.jackpot{border-top:1px solid #baa06740;border-bottom:1px solid #baa06740;padding:24px 0}.jackpot>span{display:block;color:var(--gold);letter-spacing:15px;font-size:21px;margin-bottom:25px}.jackpot strong{display:block;font:54px Georgia;color:#f4d599;margin:10px 0}.payout{margin:25px 0}.payout div{display:flex;justify-content:space-between;font-size:9px;letter-spacing:1px;padding:12px 0;border-bottom:1px solid #ffffff0b}.payout b{color:var(--gold)}.hint{font-size:10px;max-width:240px}.edition{display:block;font-size:8px;letter-spacing:2px;color:#8a987e;margin-top:35px}#toast{position:absolute;top:38%;width:100%;text-align:center;color:#fff3b6;font-weight:800;font-size:22px;text-shadow:0 2px 5px #000;pointer-events:none}.reels{position:absolute;top:17%;left:35%;width:30%;text-align:center;background:#fff0ca;color:#ba172b;border:3px solid #dbae51;border-radius:5px;font-size:22px;letter-spacing:3px}.touch{position:absolute;bottom:12%;width:20%;height:12%;opacity:0;background:#e8b45644;touch-action:none}.touch.left{left:10%}.touch.right{right:10%}button:focus-visible{outline:2px solid #fff6c6;outline-offset:3px}@media(max-width:1100px){main{gap:28px;padding:20px 30px;grid-template-columns:1fr minmax(320px,420px)}.details{display:none}h1{font-size:65px}}@media(max-width:650px){main{display:block;padding:0;min-height:100dvh}.intro,.details{display:none}.machine{border-radius:0;border:0;max-width:460px;margin:auto}.table{max-height:calc(100dvh - 123px)}header{height:65px}footer{height:58px}.touch{opacity:1;border:1px solid #f5cd7655;border-radius:50%;font-size:17px}body:before{display:none}}
+
+.charge-panel{padding:5px 17px 0;height:28px;background:#0b1d17}.charge-panel span{font-size:8px;letter-spacing:1px;color:#dfc48b;display:block;text-align:center}#power{height:3px;background:#ffffff15;margin-top:4px;border-radius:3px;overflow:hidden}#power i{display:block;width:var(--charge,0%);height:100%;background:linear-gradient(90deg,#7ecca0,#f4c55f,#ef7847)}#launch{touch-action:none;user-select:none}.table{max-height:calc(100vh - 200px)}@media(max-width:650px){.table{max-height:calc(100dvh - 151px)}}
+
+.reels{left:36.5%;width:27%;top:17.1%;height:6%;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,3vw,25px);letter-spacing:3px}.reels[hidden]{display:none}
+@media (hover:hover) and (pointer:fine){.touch{opacity:0;border:0;background:transparent}}
+/* Keep feedback readable without covering the playfield. */
+#toast{top:auto;bottom:2.5%;left:8%;width:84%;font-size:clamp(10px,2.8vw,15px);letter-spacing:.05em;text-shadow:0 2px 6px #000,0 0 12px #000;min-height:1.4em}
+#feedback{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.score-pop{position:absolute;font:700 clamp(13px,3vw,20px) Georgia,serif;color:#ffe3a0;text-shadow:0 2px 5px #251400,0 0 8px #73521e;white-space:nowrap;will-change:transform,opacity}
+.jackpot-pop{font-size:clamp(20px,5vw,30px);color:#fff4c7}
+.reels{left:33.9%;top:16.6%;width:32.2%;height:5.5%;padding:0;background:transparent;border:0;gap:5%;box-shadow:none;letter-spacing:0}
+.reels span{display:flex;width:30%;height:100%;align-items:center;justify-content:center;background:linear-gradient(#b1a181,#fff8de 25%,#fffdf4 50%,#f0e5ce 75%,#b1a181);border-radius:2px;color:#bc1e28;font:700 clamp(16px,4vw,30px) Georgia,serif;box-shadow:inset 0 0 5px #493518}
+.reels span.rolling{animation:reel-motion .1s linear infinite;filter:blur(.6px)}
+@keyframes reel-motion{0%{text-indent:-2px}50%{text-indent:2px}100%{text-indent:-2px}}
+.settings{border-top:1px solid #baa06730;padding:9px 16px;color:#ccbd9e;font-size:11px;background:#0a1916}
+.settings summary{cursor:pointer;letter-spacing:.05em;padding:3px 0}.settings label{display:flex;align-items:center;gap:12px;margin:12px 0}.settings input[type=range]{flex:1;accent-color:#e6bd70}.settings input[type=checkbox]{accent-color:#e6bd70}.settings small{display:block;line-height:1.6;color:#b5c2b7}
+button:disabled{opacity:.5;cursor:wait}#sound[aria-pressed=true]{color:#ffe3a0;border-color:#cba253}
+@media(prefers-reduced-motion:reduce){.rolling{animation:none!important;filter:none!important}}
+.reels span{overflow:hidden}.reels span b{display:block;font:inherit}.reels span.rolling{animation:none;filter:blur(.5px)}
+.table{max-height:calc(100vh - 250px)}
+@media(max-width:650px){.table{max-height:calc(100dvh - 190px)}}
+
+
+/* Independent illustrated reel strips, clipped only by the machine windows. */
+.reels{left:36.45%;top:17.045%;width:26.89%;height:6.94%;display:block;padding:0;border:0;background:none;gap:0;box-shadow:none;pointer-events:none}
+.reel-window{position:absolute;top:0;width:30.43%;height:100%;overflow:hidden;border-radius:3px;background:#fff3ce}
+.reel-window:nth-child(1){left:0}.reel-window:nth-child(2){left:35.18%;width:29.64%}.reel-window:nth-child(3){left:69.57%}
+.reel-band{position:absolute;width:100%;height:900%;will-change:transform}
+.reel-band img{display:block;width:100%;height:33.333333%;max-width:none;object-fit:fill}
+.reel-window::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(#29180566,transparent 24%,#fff8 49%,transparent 73%,#29180566)}
+.reel-window.rolling .reel-band{filter:blur(.35px)}
+.reel-win .reel-window{box-shadow:inset 0 0 8px #ffe789,0 0 8px #ffca56}
+.reel-window canvas{display:block;width:100%;height:100%}
+.reel-window::after{display:none}
+#power{position:relative}
+#power[data-last="true"]::after{content:'';position:absolute;left:clamp(1px,var(--last-charge),calc(100% - 2px));top:-3px;bottom:-3px;width:2px;background:#fff1be;box-shadow:0 0 3px #000;pointer-events:none}
+
+.goal-panel{padding:8px 12px;background:#211d16;color:#f1d48a;font-size:11px;line-height:1.5}.goal-panel small{display:block;color:#e6dfce}.study small{display:block}.study pre{max-height:260px;overflow:auto;white-space:pre-wrap;font-size:11px}.study button{margin:8px 6px 0 0}
+
+
+/* No symbolic state overlays. Illustrated objects only; prose stays semantic. */
+#toast,#chargeText,#launchHint,#goalStatus,#goalHint,.overlay h2,.overlay p,.overlay small,.overlay>.eyebrow,#autoStatus{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important}
+#playCues,.crest,.brand,.jackpot>span,#power,#debug{display:none!important}
+.goal-panel:has(#goalStatus){padding:0;height:0;overflow:hidden}.intro>.rule,.intro>.keys,.intro>p,.details>.hint,.jackpot>small{display:none}
+.touch{opacity:0!important;border:0!important;background:transparent!important;font-size:0!important}
+#start,#launchChoice,#launch,#pause,#autoStart,#autoStop{font-size:0!important;background-color:transparent!important;border:0!important;box-shadow:none!important;background-repeat:no-repeat;background-position:center;background-size:contain;width:64px;height:64px;padding:0!important}
+#start span,#launch kbd{display:none}#start{background-image:url('assets/coin.png');width:90px;height:90px}
+#launchChoice,#launch{background-image:url('assets/spring.png')}
+#pause,#autoStart,#autoStop{background-image:url('assets/lever-atlas-v1.png');background-size:200% 200%;background-position:0 0}
+#autoStop{background-position:100% 100%}body:has(#playCues[data-phase=paused]) #pause,body:has(#autoStatus[data-running=true]) #autoStart{background-position:100% 100%}
+#launchPowerLabel{font-size:0}.launch-choice{display:flex;align-items:center;gap:12px}.launch-choice input{flex:1;min-width:0}.charge-panel{height:0;padding:0}
+
+/* Articulated physical control: one immutable base, one rotating handle. */
+#pause,#autoStart,#autoStop{position:relative;width:80px;height:80px;margin-top:24px;background-image:url('assets/lever-parts-v2.png');background-size:200% 100%;background-position:0 0!important;overflow:visible}
+#pause::before,#autoStart::before,#autoStop::before{content:'';position:absolute;inset:-22.5% 0 22.5%;background:url('assets/lever-parts-v2.png') 100% 0/200% 100% no-repeat;transform-origin:50% 83%;transform:rotate(-32deg);transition:transform .35s cubic-bezier(.2,1.6,.5,1)}
+#autoStop::before,body:has(#playCues[data-phase=paused]) #pause::before{transform:rotate(32deg)}
+body:has(#autoStatus[data-running=true]) #autoStart::before{animation:mechanical-work .7s ease-in-out infinite alternate}
+@keyframes mechanical-work{from{transform:rotate(-26deg)}to{transform:rotate(26deg)}}
+body:has(#playCues[data-reduced=true]) #autoStart::before{animation:none!important;transform:rotate(26deg)}
+html[data-background=true] *,body:has(#playCues[data-phase=paused]) #autoStart::before{animation-play-state:paused!important}
+@media(prefers-reduced-motion:reduce){#autoStart::before{animation:none!important;transform:rotate(26deg)}#pause::before,#autoStop::before{transition:none}}
+
+footer{height:120px;align-items:center}footer #pause,footer #launch{flex-shrink:0}
+
+.bet-ledger{display:flex;justify-content:space-around;align-items:center;color:#f4d58c;padding:8px;font-variant-numeric:tabular-nums}.bet-ledger strong{font-size:24px}.bet-ledger span:last-child{color:#ffb9a7}
+
+
+
+/* One bounded game screen. All controls/settings are contained inside it. */
+html,body{height:100%;min-height:0;overflow:hidden}body:before{display:none}main{display:flex;align-items:center;justify-content:center;width:100%;height:100dvh;min-height:0;padding:0;margin:0;max-width:none}
+.machine{position:relative;display:block;width:min(100vw,520px);height:100dvh;max-height:100dvh;margin:0;border-radius:0;overflow:hidden}
+#gameSurface{position:relative;width:100%;height:100%;display:grid;grid-template-rows:54px 36px minmax(0,1fr) 82px;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+#gameSurface>header{height:54px;padding:6px 58px 6px 14px}header strong{font-size:20px}.bet-ledger{height:36px;padding:4px}.bet-ledger strong{font-size:21px}.table{height:100%;width:auto;max-height:none!important;max-width:100%;margin:auto;min-height:0;aspect-ratio:941/1672}.table canvas{width:100%;height:100%}
+#settingsOpen{position:absolute;top:calc(5px + env(safe-area-inset-top));right:5px;width:44px;height:44px;font-size:30px;color:#efd18c;background:#25362c;border:1px solid #b48b4e;border-radius:8px;z-index:2}
+.go-dock{position:relative;display:flex;justify-content:center;align-items:center;height:82px;background:#0b1c16}.stock{position:absolute;left:14px;top:25px}.stock label{font-size:8px}.stock #balls{font-size:15px;letter-spacing:1px}
+#launch.go-button{font-size:0!important;width:150px;height:75px;margin:0!important;border:0!important;border-radius:0;background:url('assets/go-button-v1.png') center/contain no-repeat!important;box-shadow:none!important;transition:transform .08s,filter .12s;cursor:pointer;touch-action:manipulation}
+#launch.go-button:active:not(:disabled){transform:translateY(4px)}#launch.go-button:disabled{opacity:1;filter:brightness(.42) saturate(.55);cursor:default}#launch.go-button:focus-visible{outline:3px solid #fff0c0;outline-offset:2px}
+.touch,#start,.overlay{display:none!important}[hidden]{display:none!important}
+#settingsDialog{position:absolute;z-index:20;inset:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom));display:flex;flex-direction:column;background:#10251cf5;border:2px solid #b99350;border-radius:12px;box-shadow:0 0 0 100vmax #0008;overflow:hidden;padding:12px;color:#f7ecd6}
+.dialog-heading{display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:8px}.dialog-heading h2{margin:0;font:600 22px Georgia,serif}.dialog-scroll{min-height:0;overflow:auto;overscroll-behavior:contain;overflow-wrap:anywhere;padding:8px 2px}
+#settingsDialog button{min-height:44px;min-width:44px;padding:8px 12px;background:#304535;border:1px solid #b99350;border-radius:6px;margin:4px;font-size:14px}
+#settingsDialog #pause{position:static;width:auto;height:auto;margin:4px;background:#304535!important;font-size:14px!important;padding:8px 12px!important;border:1px solid #b99350!important}#settingsDialog #pause:before{display:none}
+#settingsDialog .settings,#settingsDialog .advanced{margin:8px 0;padding:8px;border:1px solid #8d794a44;width:100%}#settingsDialog summary{min-height:44px;padding:12px 0;font-size:14px;cursor:pointer}#settingsDialog label{font-size:12px;letter-spacing:0;display:block;line-height:1.6;margin:10px 0}#settingsDialog small{display:block;font-size:11px;line-height:1.6}#settingsDialog input[type=range]{width:100%;min-height:32px}#settingsDialog input[type=number],#settingsDialog select{max-width:100%;min-height:44px}#settingsDialog pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:10px;max-width:100%}#settingsDialog p{font-size:13px}#settingsDialog #autoStatus{position:static!important;width:auto!important;height:auto!important;margin:0!important;clip:auto!important;white-space:normal!important;font-size:11px}
+#settingsDialog #autoStart,#settingsDialog #autoStop{font-size:0!important}body:has(#settingsDialog:not([hidden])) *{animation-play-state:paused!important}
+@media(max-height:520px){#gameSurface{grid-template-rows:44px 30px minmax(0,1fr) 66px}#gameSurface>header{height:44px}header strong{font-size:16px}.bet-ledger{height:30px}.go-dock{height:66px}#launch.go-button{width:125px;height:62px}.stock{top:15px}}
+
+/* The UI boundary is the actual illustrated canvas, never a padded cabinet. */
+.machine{width:min(100vw,calc(100dvh * 941 / 1672));height:auto;aspect-ratio:941/1672;max-height:100dvh;border:0;background:transparent;box-shadow:none}
+#gameSurface{display:block;position:relative;width:100%;height:100%;padding:0}
+.table{position:absolute;inset:0;width:100%;height:100%;max-width:none;aspect-ratio:auto;margin:0;z-index:0}
+#gameSurface>header{position:absolute;z-index:2;top:0;left:0;right:0;height:40px;padding:3px 50px 3px 8px;background:none;pointer-events:none;text-shadow:0 2px 3px #000,0 0 5px #000}
+header strong{font-size:clamp(12px,3vw,18px);letter-spacing:1px}header label{font-size:7px;margin-bottom:1px}
+#settingsOpen{top:3px;right:3px;z-index:3;width:44px;height:44px}
+.bet-ledger{position:absolute;z-index:2;left:5%;right:5%;top:6%;height:26px;padding:0;background:none;pointer-events:none;font-size:10px;text-shadow:0 2px 3px #000,0 0 6px #000}
+.bet-ledger strong{font-size:clamp(13px,3.5vw,20px)}
+.go-dock{position:absolute;z-index:2;left:0;right:0;bottom:0;height:9.5%;background:none;pointer-events:none;display:flex;align-items:center;justify-content:center}
+#launch.go-button{width:39%;height:100%;max-width:160px;min-height:44px;pointer-events:auto}
+.stock{left:3%;top:auto;bottom:12%;text-shadow:0 2px 3px #000,0 0 6px #000}.stock label{font-size:7px;margin:0}.stock #balls{font-size:14px}
+#settingsDialog{inset:6px;box-shadow:none;background:#10251cf5;padding:10px}
+@media(max-height:520px){#gameSurface>header{height:30px;padding-right:47px}header strong{font-size:11px}header label{font-size:6px}.bet-ledger{top:9%;font-size:8px}.bet-ledger strong{font-size:12px}.go-dock{height:12%}#launch.go-button{width:48%;height:100%;min-height:44px}.stock{left:2%}.stock #balls{font-size:11px}#settingsDialog{padding:5px;inset:3px}.dialog-heading h2{font-size:16px}}
+
+main{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}.machine{width:min(100%,calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom)) * 941 / 1672));max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom))}.go-dock{bottom:5px}
+
+/* Generated gear and explicit nine-slice artwork: corners never stretch. */
+#settingsOpen{font-size:0;background:url('assets/settings-gear-v1.png') center/contain no-repeat;border:0;border-radius:0;filter:drop-shadow(0 1px 2px #000)}#settingsOpen:active{transform:rotate(12deg)}
+#settingsDialog{border:40px solid transparent;border-image-source:url('assets/ui-frame-v3.png');border-image-slice:335 fill;border-image-width:40px;border-image-outset:0;border-image-repeat:stretch;border-radius:0;background:none;padding:4px;box-shadow:none}
+.atlas-run{display:inline-block;max-width:100%;vertical-align:middle;line-height:0;pointer-events:none}.atlas-run>canvas{display:block;max-width:none;image-rendering:auto}.atlas-accessible{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:pre!important}
+#settingsDialog .dialog-heading h2{font-size:20px}#settingsDialog button{max-width:100%}#settingsDialog summary{list-style-position:inside}.dialog-scroll{padding-right:4px}
+@media(max-width:350px){#settingsDialog{border-image-width:25px;border-width:25px;padding:3px}.dialog-heading{gap:2px}#settingsDialog button{padding:8px;font-size:12px}}
+
+/* Latest preference: genuinely bold and visibly larger, not a thicker outline alone. */
+#gameSurface>header{height:60px;padding-top:4px}header strong{font-size:24px}header label{font-size:12px}.bet-ledger{top:9%;height:34px;font-size:14px}.bet-ledger strong{font-size:24px}.stock label{font-size:12px}.stock #balls{font-size:24px}
+#settingsDialog .dialog-heading h2{font-size:28px}#settingsDialog button,#settingsDialog #pause{font-size:18px!important;line-height:1.4;padding:10px 12px!important}#settingsDialog label{font-size:18px;line-height:1.5}#settingsDialog summary{font-size:18px;line-height:1.5}#settingsDialog small,#settingsDialog p{font-size:15px;line-height:1.5}#settingsDialog pre,#settingsDialog #autoStatus{font-size:13px!important}#settingsDialog input,#settingsDialog select{font-size:17px;font-weight:700}#settingsDialog #autoStart,#settingsDialog #autoStop{font-size:0!important}
+@media(max-width:350px){#settingsDialog .dialog-heading h2{font-size:25px}#settingsDialog button,#settingsDialog #pause{font-size:17px!important;padding:8px!important}header strong{font-size:21px}.bet-ledger strong{font-size:22px}}
+@media(max-height:520px){header strong{font-size:18px}header label{font-size:10px}.bet-ledger{top:14%;font-size:12px}.bet-ledger strong{font-size:18px}.stock #balls{font-size:19px}.stock label{font-size:10px}}
+
+/* Keep bold stock label intact instead of wrapping STOCK into two lines. */
+.stock{width:25%;min-width:80px}.stock label{white-space:nowrap}
+
+/* Generated nine-slice backing plates: existing art, preserved corners. */
+#gameSurface header>div:not(.brand),.bet-ledger>span,.bet-ledger>#betMultiplier,.stock,#settingsOpen{isolation:isolate}
+#gameSurface header>div:not(.brand),.bet-ledger>span,.bet-ledger>#betMultiplier{position:relative}
+#gameSurface header>div:not(.brand)::before,.bet-ledger>span::before,.bet-ledger>#betMultiplier::before,.stock::before,#settingsOpen::before{content:"";position:absolute;inset:-3px;z-index:-1;pointer-events:none;border:9px solid transparent;border-image:url('assets/ui-frame-v3.png') 335 fill / 15px / 0 stretch}
+#settingsOpen::before{inset:0;border-width:9px}
+#gameSurface header>div:not(.brand){padding:3px 6px}
+.bet-ledger>span,.bet-ledger>#betMultiplier{padding:2px 7px}
+.stock{padding:5px;width:24%;min-width:80px}
+#settingsDialog button:not(#autoStart):not(#autoStop),#settingsDialog summary,#settingsDialog label,#settingsDialog small,#settingsDialog pre,#settingsDialog [role=status],#settingsDialog .dialog-heading h2{border:7px solid transparent;border-image:url('assets/ui-frame-v3.png') 335 fill / 13px / 0 stretch;background:none}
+#settingsDialog .dialog-heading h2{padding:5px 2px}
+#settingsDialog label,#settingsDialog small{padding:5px}
+
+/* Keep decorative bases behind the icon, and stage HUD away from upper faces. */
+#settingsOpen::after{content:"";position:absolute;inset:2px;background:url('assets/settings-gear-v1.png') center/contain no-repeat;pointer-events:none}
+#gameSurface>header{left:26%;right:14%;width:auto;padding:4px 4px 0;height:66px;gap:6px}
+#gameSurface header>div:not(.brand){min-width:0;flex:1}
+.stock{left:auto;right:2%;width:23%;min-width:76px}
+
+#stakeSelector{position:absolute;left:3%;bottom:12%;min-width:60px;min-height:44px;padding:6px 12px;font-size:24px;font-weight:900;color:#ffe4a0;border:9px solid transparent;border-image:url('assets/ui-frame-v3.png') 335 fill / 15px / 0 stretch;background:none;z-index:3}#stakeSelector:disabled{filter:brightness(.55)}
+
+#stakeSelector{pointer-events:auto}
+
+/* Functional controls use the same actual image skin, including legacy high-specificity pause. */
+#settingsDialog #pause{border:7px solid transparent!important;border-image:url('assets/ui-frame-v3.png') 335 fill /13px/0 stretch!important;background:none!important;border-radius:0!important}
+
+/* The transparent frame and translucent felt are independent images, never parent opacity. */
+:where(.ui-plate){position:relative}
+.ui-plate{isolation:isolate;border-image:none!important;background:none!important}
+#settingsDialog.ui-plate #pause.ui-plate{border-image:none!important;background:none!important}
+#gameSurface .ui-plate::before,#settingsDialog.ui-plate::before,#settingsDialog .ui-plate::before,#gameSurface .ui-plate::after,#settingsDialog.ui-plate::after,#settingsDialog .ui-plate::after{content:"";position:absolute;inset:var(--plate-inset,0px);pointer-events:none;z-index:-1;background:none;border:0 solid transparent;border-radius:0;filter:none}
+#gameSurface .ui-plate::before,#settingsDialog.ui-plate::before,#settingsDialog .ui-plate::before{border-image:url('assets/ui-base-v3.png') 160 fill /var(--plate-corner,15px)/0 stretch;opacity:.78}
+#gameSurface .ui-plate::after,#settingsDialog.ui-plate::after,#settingsDialog .ui-plate::after{border-image:url('assets/ui-frame-v3.png') 335 fill /var(--plate-corner,15px)/0 stretch;opacity:1}
+#settingsDialog.ui-plate::before{opacity:.88}
+#settingsOpen .gear-art{position:absolute;inset:2px;background:url('assets/settings-gear-v1.png') center/contain no-repeat;pointer-events:none}
+
+.ambient-extension{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:-1}.ambient-wing{position:absolute;top:0;bottom:0;width:max(0px,calc((100vw - var(--board-width))/2));overflow:hidden;mask-image:linear-gradient(to right,transparent,#000 80%)}.ambient-wing.left{left:0}.ambient-wing.right{right:0;mask-image:linear-gradient(to left,transparent,#000 80%)}.ambient-layer{position:absolute;inset:-60px;background-image:var(--ambient-art);background-size:var(--board-width) var(--board-height);background-repeat:repeat-x;background-position:center center}.ambient-layer.layer0{filter:blur(6px);opacity:.42;mask-image:linear-gradient(to right,transparent 65%,#000)}.ambient-layer.layer1{filter:blur(20px);opacity:.3;mask-image:linear-gradient(to right,transparent 15%,#000 55%,transparent 90%)}.ambient-layer.layer2{filter:blur(42px);opacity:.22;mask-image:linear-gradient(to right,#000,transparent 65%)}.ambient-wing.right .layer0{mask-image:linear-gradient(to left,transparent 65%,#000)}.ambient-wing.right .layer1{mask-image:linear-gradient(to left,transparent 15%,#000 55%,transparent 90%)}.ambient-wing.right .layer2{mask-image:linear-gradient(to left,#000,transparent 65%)}body{isolation:isolate}@media(max-width:600px){.ambient-extension{display:none}}
+
+#settingsDialog.ui-plate{overflow:visible}#settingsDialog #pause.ui-plate{position:relative}#settingsDialog #pause.ui-plate::before,#settingsDialog #pause.ui-plate::after{display:block}
+#betMultiplier{font-size:16px;line-height:1.1;text-align:center}#stakeSelector{font-size:20px;text-align:center;line-height:1.1;padding:6px 9px}#gameSurface{color:#ffda75}
+
+/* Legacy detailed HUD selectors must not replace the translucent base with the empty frame. */
+.ui-plate::before{border-image:url('assets/ui-base-v3.png') 160 fill /var(--plate-corner,15px)/0 stretch!important;inset:var(--plate-inset,0px)!important;display:block!important}
+.ui-plate::after{border-image:url('assets/ui-frame-v3.png') 335 fill /var(--plate-corner,15px)/0 stretch!important;inset:var(--plate-inset,0px)!important}
+
+/* Scenic continuation replaces repeated copies of the playable board. */
+.ambient-layer{position:fixed;inset:0;background-size:calc(var(--board-width) * 2.715) var(--board-height);background-repeat:no-repeat;background-position:center center}.ambient-wing .layer0{filter:blur(0);opacity:1;mask-image:none!important}.ambient-wing .layer1,.ambient-wing .layer2{display:none}.ambient-wing{mask-image:linear-gradient(to right,transparent,#000 55%)}.ambient-wing.right{mask-image:linear-gradient(to left,transparent,#000 55%)}
+
+.ambient-extension{mask-image:linear-gradient(to right,transparent calc(50% - var(--board-width) * 1.36),#000 calc(50% - var(--board-width) * 1.08),#000 calc(50% + var(--board-width) * 1.08),transparent calc(50% + var(--board-width) * 1.36))}
+
+/* Content stays clear of sculpted corners; readable hierarchy instead of uniform large type. */
+.machine{container-type:inline-size}#gameSurface>header{gap:9px;height:auto;padding-top:5px}#gameSurface header>div:not(.brand){padding:7px 8px}header label{font-size:10px;margin-bottom:3px}header strong{font-size:18px}.bet-ledger{top:10.5%;height:auto;gap:9px;font-size:11px}.bet-ledger>span{padding:8px 10px}.bet-ledger strong{font-size:18px}.bet-ledger>#betMultiplier{padding:6px 10px;font-size:12px}.stock{padding:10px}.stock label{font-size:10px;margin-bottom:4px}.stock #balls{font-size:21px}#stakeSelector{font-size:18px;padding:8px 12px}#settingsDialog .dialog-heading{gap:14px;margin-bottom:12px}#settingsDialog .dialog-heading h2{font-size:24px;padding:7px 5px}#settingsDialog button,#settingsDialog #pause{font-size:16px!important;padding:12px 14px!important}#settingsDialog summary{padding:13px 9px;font-size:17px}#settingsDialog label{padding:10px;margin:14px 0;font-size:16px}#settingsDialog small,#settingsDialog pre{padding:10px;line-height:1.65}.dialog-scroll{padding:3px 5px 12px}
+@container(min-width:450px){header strong{font-size:22px}.bet-ledger strong{font-size:22px}.bet-ledger>#betMultiplier{font-size:14px}.stock #balls{font-size:24px}}
+@container(max-width:300px){#gameSurface>header{left:2%;right:24%;gap:6px}header strong{font-size:16px}header label{font-size:9px}#gameSurface header>div:not(.brand){padding:7px}.bet-ledger{left:3%;right:3%;top:17%;gap:6px}.bet-ledger>span{display:flex;flex-direction:column;align-items:center;padding:6px 8px;font-size:10px}.bet-ledger strong{font-size:15px}.bet-ledger>#betMultiplier{font-size:10px;padding:7px}.stock{min-width:60px;padding:8px;width:auto;right:1%}.stock #balls{font-size:15px}.stock label{font-size:9px}#stakeSelector{left:1%;font-size:14px;padding:6px;min-width:54px}#launch.go-button{width:32%;min-width:60px}#settingsDialog{border-width:24px}#settingsDialog .dialog-heading{gap:4px;flex-wrap:wrap}#settingsDialog .dialog-heading h2{font-size:20px}#settingsDialog button,#settingsDialog #pause{font-size:14px!important;padding:9px!important}#settingsDialog summary,#settingsDialog label{font-size:14px}}
+
+@container(min-width:301px) and (max-width:350px){.bet-ledger{font-size:10px;gap:7px}.bet-ledger>span{padding:6px 8px}.bet-ledger strong{font-size:16px}.bet-ledger>#betMultiplier{font-size:11px;padding:5px 8px}}

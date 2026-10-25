@@ -1,0 +1,3 @@
+const Skin=require('./idle-skin.js'),assert=require('assert/strict');const s=new Skin();s.react(1);let minimum=Infinity;
+for(let n=0;n<180;n++){s.advance(.04);if(n%30===0)s.react(1);for(let y=0;y<72;y++)for(let x=0;x<40;x++){const point=(i,j)=>{const u=i/40,v=j/72,d=s.offset('board-clean',u,v,941,1672);return [u*941+d[0],v*1672+d[1]];},a=point(x,y),b=point(x+1,y),c=point(x+1,y+1),d=point(x,y+1);for(const [p,q,r] of [[a,b,c],[a,c,d]]){const cross=(q[0]-p[0])*(r[1]-p[1])-(q[1]-p[1])*(r[0]-p[0]);minimum=Math.min(minimum,cross);}}}
+assert(minimum>0,'skin folds inverted triangles');console.log('PASS no inverted board triangles, minimum twice-area:',minimum);

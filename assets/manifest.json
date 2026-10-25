@@ -1,0 +1,178 @@
+{
+  "ball": {
+    "file": "ball.png",
+    "width": 1254,
+    "height": 1254,
+    "bounds": [
+      83,
+      89,
+      1168,
+      1165
+    ]
+  },
+  "blue-bumper": {
+    "file": "blue-bumper.png",
+    "width": 1254,
+    "height": 1254,
+    "bounds": [
+      106,
+      137,
+      1149,
+      1135
+    ]
+  },
+  "board-clean": {
+    "file": "board-clean-v3.png",
+    "width": 941,
+    "height": 1672,
+    "bounds": [
+      0,
+      0,
+      941,
+      1672
+    ]
+  },
+  "bumper": {
+    "file": "bumper.png",
+    "width": 1254,
+    "height": 1254,
+    "bounds": [
+      50,
+      78,
+      1203,
+      1159
+    ]
+  },
+  "dice": {
+    "file": "dice.png",
+    "width": 1254,
+    "height": 1254,
+    "bounds": [
+      101,
+      119,
+      1152,
+      1142
+    ]
+  },
+  "flipper": {
+    "file": "flipper.png",
+    "width": 1983,
+    "height": 793,
+    "bounds": [
+      93,
+      136,
+      1890,
+      658
+    ]
+  },
+  "roulette-disc": {
+    "file": "roulette-disc.png",
+    "width": 1254,
+    "height": 1254,
+    "bounds": [
+      39,
+      37,
+      1215,
+      1211
+    ]
+  },
+  "roulette-frame": {
+    "file": "roulette-frame-v2.png",
+    "width": 1467,
+    "height": 1072,
+    "bounds": [
+      7,
+      8,
+      1459,
+      1040
+    ]
+  },
+  "sling": {
+    "file": "sling.png",
+    "width": 1375,
+    "height": 1144,
+    "bounds": [
+      52,
+      24,
+      1229,
+      1131
+    ]
+  },
+  "slot": {
+    "file": "slot.png",
+    "width": 1536,
+    "height": 1024,
+    "bounds": [
+      120,
+      15,
+      1415,
+      997
+    ]
+  },
+  "spin": {
+    "file": "spin.png",
+    "width": 1254,
+    "height": 1254,
+    "bounds": [
+      42,
+      88,
+      1210,
+      1177
+    ]
+  },
+  "spindle": {
+    "file": "spindle.png",
+    "width": 1312,
+    "height": 1199,
+    "bounds": [
+      302,
+      128,
+      1008,
+      1074
+    ]
+  },
+  "spring": {
+    "file": "spring.png",
+    "width": 1024,
+    "height": 1536,
+    "bounds": [
+      346,
+      35,
+      670,
+      1499
+    ]
+  },
+  "chips-stack": {
+    "file": "chips-stack.png",
+    "width": 1254,
+    "height": 1254,
+    "bounds": [
+      116,
+      146,
+      1140,
+      1116
+    ]
+  },
+  "spin-decal": {
+    "file": "spin-decal.png",
+    "width": 1254,
+    "height": 1254,
+    "bounds": [
+      39,
+      42,
+      1214,
+      1211
+    ]
+  },
+  "coin": {
+    "file": "coin.png",
+    "width": 1254,
+    "height": 1254,
+    "bounds": [
+      0,
+      17,
+      1233,
+      1235
+    ]
+  }
+}

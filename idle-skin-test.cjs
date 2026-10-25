@@ -1,0 +1,4 @@
+const assert=require('node:assert/strict'),Skin=require('./idle-skin.js'),s=new Skin();
+for(let n=0;n<100;n++){s.advance(.04);for(const key of ['board-clean','ball','flipper','bumper','spin','sling','slot','spring'])assert.deepEqual(s.offset(key,.5,.4,200,200),[0,0]);assert(Math.hypot(...s.offset('character-waiter',.5,.4,410,410))<3);}
+const a={fps:12,sequence:[0,1,2,3]},clock=new Skin();clock.advance(.04);clock.advance(.04);assert.equal(clock.frame(a),0);clock.advance(.01);assert.equal(clock.frame(a),1);const t=clock.time;clock.advance(0);assert.equal(clock.time,t);clock.advance(0,true);assert.equal(clock.frame(a),0);assert.deepEqual(clock.offset('character-waiter',.5,.4,410,410),[0,0]);
+console.log('PASS 12 FPS frame clock separate from physics, static background, rigid inorganic objects, small character secondary skin, pause and reduced motion');

@@ -1,0 +1,40 @@
+{
+  "gear": "settings-gear-v1.png",
+  "panel": {
+    "file": "ui-frame-v3.png",
+    "width": 1254,
+    "height": 1254,
+    "insets": {
+      "top": 335,
+      "right": 335,
+      "bottom": 335,
+      "left": 335
+    },
+    "destinationCornerPixels": 40,
+    "narrowCornerPixels": 25,
+    "mode": "nine-slice CSS border-image with center fill; stretch edges and center only",
+    "compactCornerPixels": 15,
+    "controlCornerPixels": 13,
+    "center": "transparent alpha"
+  },
+  "tool": "built-in image_gen",
+  "prompts": {
+    "gear": "Antique brass six-tooth mechanical gear, front orthographic, transparent, readable at44px, no text.",
+    "panel": "Edit v1: broad thick beveled gold borders, large simple scroll corners, no tiny filigree; dark emerald felt center, straight stretchable edges, transparent outside.",
+    "frame": "Remove all green interior from v2, preserve chunky gold frame, transparent center and outside.",
+    "base": "Dark emerald felt rounded rectangle, no frame/ornament/text, transparent outside, separate nine-slice base."
+  },
+  "base": {
+    "file": "ui-base-v3.png",
+    "width": 1254,
+    "height": 1254,
+    "insets": {
+      "top": 160,
+      "right": 160,
+      "bottom": 160,
+      "left": 160
+    },
+    "opacity": 0.78,
+    "dialogOpacity": 0.88
+  }
+}

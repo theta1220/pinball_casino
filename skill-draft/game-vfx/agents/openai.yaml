@@ -1,0 +1,4 @@
+interface:
+  display_name: "ゲームエフェクト"
+  short_description: "粒子・光・影・残像を視認性と描画負荷に合わせて調整する"
+  default_prompt: "$game-vfx を使い、ゲームの視覚効果を、操作対象の見やすさを保って磨いてください。"

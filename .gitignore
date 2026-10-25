@@ -1,0 +1,14 @@
+PLAY_OFFLINE.html
+_site/
+node_modules/
+__pycache__/
+.env*
+*.log
+background-extension-candidate/
+study-evidence/
+*-browser-evidence.json
+auto-results.json
+*-proof.png
+*CHECKPOINT*.md
+assets/*preview*.png
+assets/casino-panorama-v1.png

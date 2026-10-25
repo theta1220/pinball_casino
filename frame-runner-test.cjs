@@ -1,0 +1,8 @@
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');const root=__dirname;require(root+'/physics.js');const gl=new Proxy({},{get:(_,k)=>k==='getShaderParameter'?()=>true:()=>({})}),els={},listeners={};const el=id=>els[id]??={value:({autoRuns:'2',autoSeed:'1',autoLimit:'10',launchPowerChoice:'75',studySource:'developer'})[id]||'',style:{setProperty(){}},setAttribute(){},querySelector:()=>({}),getContext:()=>gl};const c={devicePixelRatio:1,PinballPhysics,document:{getElementById:el,querySelector:el,addEventListener(){}},window:{addEventListener(n,f){(listeners[n]??=[]).push(f);}},localStorage:{getItem(){},setItem(){}},performance:{now:()=>0},requestAnimationFrame(){},console,Math,assert,listeners};vm.createContext(c);
+vm.runInContext(['magic-trail.js','rules.js','autoplay.js','return-cohort.js','engagement.js','game.js'].map(f=>fs.readFileSync(root+'/'+f,'utf8')).join('\n')+`
+study.enable(true);$('autoFastTest').checked=true;$('autoSeed').value='2026';$('autoStart').onclick();
+for(let n=1;n<100&&auto.running;n++)frame(n*1000);
+assert.equal(auto.reason,'TIME LIMIT');assert.equal(state,'paused');assert(liveBalls.length>0);assert(auto.history.every(x=>Number.isFinite(x.score)&&x.score>=0));assert(study.rows.every(r=>r.executionMode==='fixed-step-browser-test'&&r.mode==='auto-only'));
+pause();$('autoStart').onclick();frame(110000);const clock=auto.elapsed;document.hidden=true;frame(111000);assert.equal(auto.elapsed,clock);document.hidden=false;pause();frame(112000);assert.equal(auto.running,false);assert(!keys.left&&!keys.right);pause();frame(113000);assert.equal(auto.running,false);
+console.log('PASS browser-frame fixed-step runner, bounded multiball time limit, execution provenance, hidden freeze, pause and release');
+`,c);

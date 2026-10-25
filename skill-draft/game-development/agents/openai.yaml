@@ -1,0 +1,4 @@
+interface:
+  display_name: "ゲーム開発"
+  short_description: "入力・物理・素材・UI・演出を統合し、遊べるゲームを完成させる"
+  default_prompt: "$game-development を使い、既存の仕様を引き継いでゲームを実装・検証してください。"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "ゲームアニメーション"
+  short_description: "動きの支点・時間制御・遷移・割り込みを自然に整える"
+  default_prompt: "$game-animation を使い、ゲーム内の動きと遷移を調整し、フレーム依存や支点ずれを検証してください。"

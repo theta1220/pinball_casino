@@ -1,0 +1,17 @@
+{
+  "name": "royal-flush-pinball",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node verify.cjs && node audio-test.cjs && node audio-preference-test.cjs && node reaction-test.cjs && node rules-test.cjs && node engagement-test.cjs && node engagement-integration-test.cjs && node launch-choice-test.cjs && node return-guidance-test.cjs && node autoplay-test.cjs && node idle-skin-test.cjs && node sprite-animation-test.cjs && node frame-runner-test.cjs && node magic-trail-test.cjs && node character-atlas-test.cjs && node occlusion-mask-test.cjs && node smoothing-test.cjs && node character-event-test.cjs && node return-cohort-test.cjs && node multiball-test.cjs && node multiball-guards-test.cjs && node go-test.cjs && node settings-dialog-test.cjs && node rich-ui-test.cjs && node stake-test.cjs && node stake-integration-test.cjs && node roulette-visible-payout-test.cjs && python roulette-art-test.py",
+    "test:play": "node playtest.cjs",
+    "start": "node server.cjs",
+    "check": "node --check rules.js && node --check reel-renderer.js && node --check reactions.js && node --check audio.js && node --check feedback.js && node --check sprites.js && node --check physics.js && node --check game.js && node --check engagement.js && node --check autoplay.js && node --check cues.js && node --check idle-skin.js && node --check sprites.js && node --check magic-trail.js && node --check occlusion-mask.js && node --check return-cohort.js && node --check text-atlas.js && node --check text-atlas-manifest.js && node --check ui-skin.js",
+    "test:learning": "node learning-test.cjs",
+    "test:engagement": "node engagement-test.cjs",
+    "build:offline": "node build-offline.cjs",
+    "test:offline": "node offline-test.cjs",
+    "build:text": "python generate-text-atlases.py",
+    "test:glyphs": "python validate-glyph-pixels.py"
+  }
+}
