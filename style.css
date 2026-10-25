@@ -178,3 +178,10 @@ main{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 /* Keep rapid GO taps in the game. The board still supports pinch zoom. */
 #gameSurface{touch-action:manipulation}
 #launch.go-button{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+
+/* Visual pixels come only from the main WebGL canvas; semantic layout stays hittable. */
+html.webgl-ui #gameSurface>header,html.webgl-ui #settingsOpen,html.webgl-ui .bet-ledger,html.webgl-ui .go-dock,html.webgl-ui #settingsDialog,html.webgl-ui #feedback,html.webgl-ui #reels,html.webgl-ui #toast{opacity:0!important}
+.webgl-select-menu{position:absolute;z-index:100;padding:6px;background:none;max-height:80%;overflow:auto}.webgl-select-menu button{display:block;width:100%;min-height:44px;margin:4px 0}
+html.webgl-ui .reel-window{background:none;box-shadow:none}html.webgl-ui input,html.webgl-ui select{min-height:32px}html.webgl-ui input[type=checkbox]{min-width:26px;min-height:26px}
+html.webgl-ui .settings label:has(input[type=checkbox]){display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start}html.webgl-ui .settings label:has(input[type=checkbox]) input{margin:0}html.webgl-ui input[type=range]{touch-action:none}
+html.webgl-ui #settingsDialog input[inputmode=numeric],html.webgl-ui #settingsDialog select{width:100%;max-width:100%;min-width:0;box-sizing:border-box}

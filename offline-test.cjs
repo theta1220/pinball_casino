@@ -3,4 +3,4 @@ const go=fs.readFileSync("assets/go-button-v1.png");assert(h.includes(go.toStrin
 
 assert(!/<aside|<footer|<body>.*?<main>[\s\S]*?<\/main><details/.test(h));assert(h.includes('id="settingsDialog" role="dialog"'));assert(h.includes('id="settingsOpen"'));console.log("PASS no external panels/footer, contained settings dialog and gear");
 
-for(const f of ["settings-gear-v1.png",JSON.parse(fs.readFileSync("assets/ui-skin-manifest.json")).panel.file,JSON.parse(fs.readFileSync("assets/ui-skin-manifest.json")).base.file])assert(h.includes(fs.readFileSync("assets/"+f).toString("base64")));assert(h.includes("globalThis.PINBALL_TEXT="));assert(h.includes("root.AtlasText=AtlasText"));console.log("PASS gear/nine-slice bytes and text renderer embedded");
+for(const f of ["settings-gear-v1.png",JSON.parse(fs.readFileSync("assets/ui-skin-manifest.json")).panel.file,JSON.parse(fs.readFileSync("assets/ui-skin-manifest.json")).base.file])assert(h.includes(fs.readFileSync("assets/"+f).toString("base64")));assert(h.includes("globalThis.PINBALL_TEXT="));assert(h.includes("root.PinballWebGLUI="));console.log("PASS gear/nine-slice bytes and text renderer embedded");

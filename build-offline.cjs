@@ -6,6 +6,7 @@ const ctx={};vm.createContext(ctx);vm.runInContext(read('asset-manifest.js'),ctx
 vm.runInContext(read('text-atlas-manifest.js'),ctx);for(const meta of Object.values(ctx.PINBALL_TEXT.styles))images[meta.file]=data('assets/'+meta.file);
 const cssAssets=new Map();
 let css=read('style.css').replace(/@import\s+url\([^)]*\);/g,'').replace(/url\(['"]?(assets\/[^)'"\s]+)['"]?\)/g,(_,f)=>{if(!cssAssets.has(f))cssAssets.set(f,'--embedded-image-'+cssAssets.size);return 'var('+cssAssets.get(f)+')';});
+for(const f of cssAssets.keys())images[path.basename(f)]=data(f);
 const cssPayload=Object.fromEntries([...cssAssets].map(([f,k])=>[k,data(f)]));
 const cssBootstrap="(function hydrate(assets,css){const rules=Object.entries(assets).map(([key,value])=>{const [head,body]=value.split(',');const bytes=Uint8Array.from(atob(body),c=>c.charCodeAt(0));return key+':url(\"'+URL.createObjectURL(new Blob([bytes],{type:head.slice(5,head.indexOf(';'))}))+'\")';}).join(';');const style=document.createElement('style');style.textContent=':root{'+rules+'}'+css;document.head.append(style);})("+JSON.stringify(cssPayload)+","+JSON.stringify(css)+");";
 let html=read('index.html').replace(/<link[^>]+href="style.css"[^>]*>/,'<script>'+cssBootstrap+'</script>');

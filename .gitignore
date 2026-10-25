@@ -16,3 +16,6 @@ assets/casino-panorama-v1.png
 flicker-fix-candidate/
 performance-fix-candidate/
 touch-fix-candidate/
+
+webgl-ui-candidate/
+_ui-context-qa.html

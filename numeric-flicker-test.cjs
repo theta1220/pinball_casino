@@ -22,7 +22,7 @@ function environment(version){
  }
  const machine=new E('main'),surface=new E('section','gameSurface');machine.append(surface);
  const ids={};for(const id of ['score','best','balls','betBlack','betRed','betMultiplier','stakeSelector']){ids[id]=new E('span',id);surface.append(ids[id]);ids[id].textContent='0.0';}
- const c={requestAnimationFrame:f=>jobs.push(f),devicePixelRatio:2,NodeFilter:{SHOW_TEXT:4},getComputedStyle:()=>({fontSize:'24px',paddingLeft:'0',paddingRight:'0'})};vm.createContext(c);
+ const c={ui:null,requestAnimationFrame:f=>jobs.push(f),devicePixelRatio:2,NodeFilter:{SHOW_TEXT:4},getComputedStyle:()=>({fontSize:'24px',paddingLeft:'0',paddingRight:'0'})};vm.createContext(c);
  vm.runInContext(fs.readFileSync(path.join(__dirname,'text-atlas-manifest.js'),'utf8')+fs.readFileSync(path.join(__dirname,version,'text-atlas.js'),'utf8'),c);
  c.document={createElement:t=>new E(t),querySelector:()=>machine,getElementById:id=>ids[id],createTreeWalker(root){const collect=n=>n.children.flatMap(ch=>ch.tagName==='#text'?[ch]:collect(ch));const ns=collect(root);let i=0;return{nextNode(){this.currentNode=ns[i++];return !!this.currentNode;}};}};
  const renderer=Object.create(c.AtlasText.prototype);Object.assign(renderer,{meta:c.PINBALL_TEXT,images:{numeric:{},gold:{},body:{}},observer:{disconnect(){},observe(){}},pending:false});
