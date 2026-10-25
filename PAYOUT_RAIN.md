@@ -1,16 +1,11 @@
-# Payout rain — confirmed rule and implementation defaults
+# Roulette rain and full-board conversion
 
-The user requested real balls raining from random positions above the board after roulette winnings increase stock to at least10, and explicitly confirmed stock consumption. This overrides the previous no-reward-autofire rule only for this trigger.
+Positive roulette payout first credits ammunition. If resulting stock is at least10, the excess above9 is committed to top rain. Existing live/captured/launching balls and GO/rain reservations share12slots. Only free slots are reserved; excess is immediately consumed into score at the user-confirmed10points per x1 ball. Example0+160 with one captured owner: stock9,11rain reservations,140converted balls=1400score. No millions-sized queue or per-award-ball loop.
 
-- Credit the exact roulette award first. A positive award bringing available stock to10 or more atomically reserves the excess above9; spendable stock becomes9. Example0+160 => credit160, stock9, rain reservation151. Zero awards do not trigger.
-- Each reserved ball costs1 and has immutable x1, independent of the captured payout owner's stake. No double multiplier. Separate seeded RNG preserves GO's launch RNG.
-- Spawn at most one every0.2seconds, within existing12live-ball cap. Reservations are a count, not a huge allocated array. Full board delays, never discards. GO reserves only spendable stock and retains its original launcher path.
-- Rain enters at y=-20,x370..700, descends through the top-boundary entry corridor, and joins ordinary board physics at y250 (logical941x1672). No ball-ball collision. This entry phase is analogous to the guided launcher; it is not a teleport directly into the playfield.
-- Initial10/newgame and generic test credits do not trigger. Pause, settings and hidden state freeze simulation/queue; restart clears old-game reservations. Pending rain prevents premature game over. No background timers.
-- Logs distinguish stockAfterCredit, stockAfter, rainPending and rainLaunched. Experiment versiongo-ammo-v4+stake-v1+rain-v1 preserves old records. Ordinary rain is not diagnostic AUTO or voluntary user input.
+A GO at capacity consumes its selectedN stock once and adds10*N score, without spawning or reserving. If the launcher alone is occupied while capacity exists, retain the paid immutable stake reservation. Unexpected capacity changes trim pending reservations once, retaining earlier GO slots before rain. Converted balls never reappear.
 
-9retained/0.2s/12cap/x1 are coherent implementation defaults, not amounts explicitly specified by the user. 60FPS target, reference resolution and shared WebGL UI remain unchanged.
+Rain remains paced0.2seconds, x1, above-board validated side portals; initial10 and generic credits do not trigger it. Pause/hidden/settings freeze simulation, restart clears old state. Score/BEST use existing exact safe-integer arithmetic and compact gold HUD; unsupported overflow is rejected before mutation, never silently clamped. Experiment rain-v2 preserves old records.
 
-Validation: threshold9/10/large award, zero stock, GO competition, repeated payouts, cadence/cap, pause/hidden/restart, deterministic top entry and all-ball-drain pending queue. Legacy payout tests now assert credited value plus reservation conservation; isolated capture-release fixtures hold rain cadence to test their original subject. Dedicated tests exercise actual rain progression.
+Regression: million-ball credit arithmetic,10x mixed stakes, lane-only waits, dynamic cap changes, no duplicate conversion, safe-range atomicity, natural zero-stock payout and all color/reset tests. Runtime/browser verification recorded in final report.
 
-Actual browser manual x10GO with seed168 naturally awarded160: stock9/pending151, then rain visibly entered from above and active count reached12 without exceeding cap. Later ordinary roulette wins reserved more rain; GO count stayed1. No score/award injection. iPhone thermal effect is unmeasured; a long cascade can persist at the cap. Directfile:// route remains untested under prior tool restriction; regenerated HTML tested over HTTP and statically.
+Controlled browser fixture:12live balls plus100award produced stock9,score910,no GO/rain reservation. Full-board x5 GO produced stock0,score50,no reservation; console errors empty. This was synthetic setup through a local test button, not a natural gameplay observation. Existing seeded natural roulette tests independently verify award/reset and converted accounting.
