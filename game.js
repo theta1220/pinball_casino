@@ -32,6 +32,7 @@ const auto=typeof PinballAuto==='undefined'?null:new PinballAuto();
 const magic=typeof PinballMagicTrail==='undefined'?null:new PinballMagicTrail();
 const study=typeof PinballEngagement==='undefined'?null:new PinballEngagement((()=>{try{return globalThis.localStorage;}catch{return null;}})());
 let rouletteResult=null,lastRouletteResultId=null,gameOverAge=0;
+let goHold=null,goClickBlockedUntil=0;const manualPointers=new Map(),manualKeys=new Set();
 function showRouletteResult(result){
  if(!result||result.id===lastRouletteResultId||!(result.bets.black+result.bets.red>0))return false;
  lastRouletteResultId=result.id;rouletteResult={id:result.id,award:result.award,text:result.award>0?'WIN+'+compactNumber(result.award):'LOSE...',age:0,duration:2.4};
@@ -186,13 +187,13 @@ function canLaunch(){
  return !liveBalls.some(b=>b.phase!=='ready'&&(b.phase==='launch'||Math.hypot(b.x-894,b.y-1240)<70));
 }
 function syncGo(){const options=affordableStake(),selector=$('stakeSelector');if(selector){setHudText(selector,'BET\nx'+selectedStake);const disabled=settingsOpen||state==='paused'||options.length===0;if(selector.disabled!==disabled)selector.disabled=disabled;selector.setAttribute('aria-label','Launch stake x'+selectedStake+' - costs '+selectedStake+' ammunition');}const b=$('launch');if(!b)return;const disabled=!canLaunch();if(b.disabled!==disabled)b.disabled=disabled;b.setAttribute('aria-label','GO launch - remaining '+balls+' balls');}
-function go(diagnostic=false){
- if(!canLaunch()){syncGo();return false;}
+function go(diagnostic=false,power=.85){
+ if(!Number.isFinite(power)||power<0||power>1||!canLaunch()){syncGo();return false;}
  if(!diagnostic){sound?.unlock?.()?.then(showSound);stopAuto('MANUAL');}else study?.markAutomatic(auto?.seed||1);
  const stake=selectedStake;if(state==='intro'){start();selectedStake=stake;}
  if(state==='ready'){for(const b of liveBalls)b.magic?.clear();liveBalls=[];state='play';}
- balls-=stake;goStakes.push(Object.freeze({stake,source:diagnostic?'diagnostic-auto':'user-go'}));goReservations++;
- stakeHistory.push({stake,source:diagnostic?'diagnostic-auto':'user-go'});if(stakeHistory.length>100)stakeHistory.shift();study?.event('inputs');
+ balls-=stake;goStakes.push(Object.freeze({stake,power,source:diagnostic?'diagnostic-auto':'user-go'}));goReservations++;
+ stakeHistory.push({stake,power,source:diagnostic?'diagnostic-auto':'user-go'});if(stakeHistory.length>100)stakeHistory.shift();study?.event('inputs');
  queueLaunch(0);updateUI();syncGo();return true;
 }
 function automaticFlippers(dt){
@@ -203,13 +204,13 @@ function queueLaunch(dt){
  trimCapacity();queueWait=Math.max(0,queueWait-dt);
  if(!goReservations||queueWait>0||liveBalls.length>=MAX_LIVE_BALLS||liveBalls.some(b=>b.phase==='launch'||b.phase==='ready'||Math.hypot(b.x-894,b.y-1240)<70))return;
  const reservation=goStakes.shift()||{stake:1,source:'legacy-test'};const b=attachBall({x:894,y:1240,vx:0,vy:0,r:17,omega:0,angle:0,trail:[],stakeMultiplier:reservation.stake},'launch');b.launchSource=reservation.source;
- b.rail={segments:makeLaunchSegments(launchPoints),travel:0,speed:350+1550*(.8+.2*launchRandom())};b.goAuthorized=true;
+ b.rail={segments:makeLaunchSegments(launchPoints),travel:0,speed:350+1550*(reservation.power??.85)};b.goAuthorized=true;
  goReservations--;goLaunched++;queueWait=.45;study?.event('launches');sound?.cue('launch',.7,894);reactions?.hit('launch',.5,894,1240);
 }
 
 let lastLaunchPower=null,launchMethod='hold',lastLaunchReturned=false;
 let charging=false,charge=0,recoil=0,stalledFor=0,stallAnchor={x:0,y:0},recoveryCount=0,sessionRecoveries=0;
-function cancelCharge(){sound?.charge(0,false);charging=false;charge=0;if(state==='ready')ball.y=1240;updateChargeUI();}
+function cancelCharge(){cancelGoHold();sound?.charge(0,false);charging=false;charge=0;if(state==='ready')ball.y=1240;updateChargeUI();}
 function returnGuidance(){return 'Last launch '+lastLaunchPower+'% did not reach the board. '+(launchMethod==='selected'?'Increase the selected power and retry.':'Hold longer before release.')+' No ammunition lost.';}
 function updateChargeUI(){
  if($('launchHint'))$('launchHint').textContent=lastLaunchReturned?returnGuidance():'Select launch power. Low power returns before reaching the board.';
@@ -269,7 +270,7 @@ function collectTarget(id){
 }
 function endGame(){
  if(state==='over'||balls>0||occupiedSlots()>0||goReservations||rainPending||spinTime>0)return false;
- rouletteResult=null;gameOverAge=0;$('gameOverPanel').hidden=false;$('retry').disabled=false;ui?.invalidate();$('retry').focus?.({preventScroll:true});
+ clearManualInput();rouletteResult=null;gameOverAge=0;$('gameOverPanel').hidden=false;$('retry').disabled=false;ui?.invalidate();$('retry').focus?.({preventScroll:true});
  study?.finish();showStudy();
  sound?.charge(0,false);state='over';syncLaunchChoice();syncGo();keys.left=keys.right=false;
  $('overlay').hidden=true;$('overlay').querySelector('h2').textContent='GAMEOVER...';
@@ -277,7 +278,7 @@ function endGame(){
  $('start').textContent='Play again';
 }
 function resetBall(){liveBalls=[];ball={x:894,y:1240,vx:0,vy:0,r:17,omega:0,angle:0,trail:[]};attachBall(ball,'ready');roulette.owner=null;magic?.clear();lastLaunchReturned=false;roulette.phase='idle';roulette.stable=0;roulette.inside=false;roulette.cooldown=0;Object.assign(ball,{x:894,y:1240,vx:0,vy:0,omega:0,angle:0,trail:[]});for(const f of flippers){f.a=f.rest;f.omega=0;}keys.left=keys.right=false;state='ready';charging=false;charge=0;recoil=0;stalledFor=0;recoveryCount=0;updateChargeUI();$('launch').disabled=false;toast('');}
-function start(){if(art&&!ready)return;$('gameOverPanel').hidden=true;$('retry').disabled=true;study?.start('go-ammo-v4+stake-v1+rain-v4+stock-cap3+go-ready-v1',auto?.running?'automation':$('studySource')?.value||'browser-unverified',$('studySource')?.value||'browser-unverified');if(auto?.running)study?.markAutomatic(auto.seed);if(study?.current)study.current.executionMode=auto?.running&&$('autoFastTest')?.checked?'fixed-step-browser-test':'realtime-input';art?.skin?.resetClips?.();sound?.stopAll();sound?.pause(false);feedback?.clear();reactions?.clear();roulette.light=0;roulette.angle=0;roulette.angularSpeed=.12;sessionRecoveries=0;for(const shape of world.shapes){shape.lastHit=-Infinity;shape.lastRelease=-Infinity;}lastLaunchPower=null;$('power').setAttribute('data-last','false');rouletteResult=null;lastRouletteResultId=null;score=0;overflowScore=0;balls=STOCK_CAP;peakLive=0;rainPending=rainLaunched=rainWait=0;goReservations=goLaunched=0;goStakes=[];stakeHistory=[];settlementHistory=[];selectedStake=1;flipperClock=0;world.ballContacts=0;ammoAwarded=0;queueWait=0;nextBallId=1;launchSeed=(Number($('autoSeed')?.value)||1)>>>0;rainSeed=(launchSeed^0x9e3779b9)>>>0;spinTime=0;spinCooldown=0;resultHold=0;rules.reset();particles=[];if(!feedback)$('reels').hidden=true;$('overlay').hidden=true;updateUI();resetBall();syncRouletteGate();syncGo();}
+function start(){if(art&&!ready)return;clearManualInput();$('gameOverPanel').hidden=true;$('retry').disabled=true;study?.start('go-ammo-v4+stake-v1+rain-v4+stock-cap3+go-ready-v1',auto?.running?'automation':$('studySource')?.value||'browser-unverified',$('studySource')?.value||'browser-unverified');if(auto?.running)study?.markAutomatic(auto.seed);if(study?.current)study.current.executionMode=auto?.running&&$('autoFastTest')?.checked?'fixed-step-browser-test':'realtime-input';art?.skin?.resetClips?.();sound?.stopAll();sound?.pause(false);feedback?.clear();reactions?.clear();roulette.light=0;roulette.angle=0;roulette.angularSpeed=.12;sessionRecoveries=0;for(const shape of world.shapes){shape.lastHit=-Infinity;shape.lastRelease=-Infinity;}lastLaunchPower=null;$('power').setAttribute('data-last','false');rouletteResult=null;lastRouletteResultId=null;score=0;overflowScore=0;balls=STOCK_CAP;peakLive=0;rainPending=rainLaunched=rainWait=0;goReservations=goLaunched=0;goStakes=[];stakeHistory=[];settlementHistory=[];selectedStake=1;flipperClock=0;world.ballContacts=0;ammoAwarded=0;queueWait=0;nextBallId=1;launchSeed=(Number($('autoSeed')?.value)||1)>>>0;rainSeed=(launchSeed^0x9e3779b9)>>>0;spinTime=0;spinCooldown=0;resultHold=0;rules.reset();particles=[];if(!feedback)$('reels').hidden=true;$('overlay').hidden=true;updateUI();resetBall();syncRouletteGate();syncGo();}
 function launch(){
  if(state!=='ready'||!charging)return;
  lastLaunchReturned=false;study?.event('launches');charging=false;state='launch';launchSegment=0;launchDistance=0;launchTravel=0;
@@ -288,7 +289,7 @@ function launch(){
  ball.phase='launch';ball.rail={segments:launchSegments,travel:0,speed:launchSpeed};ball.vy=-launchSpeed;recoil=.25;charge=0;updateChargeUI();
  $('launch').disabled=true;sound?.cue('launch',1,894);reactions?.hit('launch',.5,894,1240);$('toast').textContent='';
 }
-function pause(){stopAuto('PAUSED');cancelCharge();if(state==='intro'||state==='over')return;if(state==='paused'){state=prior;toast('RESUME');$('pause').textContent='Ⅱ';}else{prior=state;state='paused';toast('PAUSED');toastTime=Infinity;$('pause').textContent='▶';}keys.left=keys.right=false;sound?.pause(state==='paused');syncLaunchChoice();syncGo();}
+function pause(){clearManualInput();stopAuto('PAUSED');cancelCharge();if(state==='intro'||state==='over')return;if(state==='paused'){state=prior;toast('RESUME');$('pause').textContent='Ⅱ';}else{prior=state;state='paused';toast('PAUSED');toastTime=Infinity;$('pause').textContent='▶';}keys.left=keys.right=false;sound?.pause(state==='paused');syncLaunchChoice();syncGo();}
 function syncLaunchChoice(){const b=$('launchChoice');if(b)b.disabled=state!=='ready'||charging;}
 function launchChoice(){
  if(state!=='ready'||charging)return;
@@ -302,7 +303,7 @@ function stopAuto(reason='MANUAL'){if(reason==='MANUAL')study?.markManual?.();if
 function autoStep(dt){if(!auto?.running)return;const action=auto.tick(dt,{state,x:ball.x,y:ball.y,score});if(!action)return;
  if(action.stop){stopAuto(action.stop);if(action.stop==='TIME LIMIT'&&state!=='over'&&state!=='intro'&&state!=='paused')pause();return;}
  if(action.start){start();study?.markAutomatic(auto.seed);}
- if(action.launch!==undefined){selectedStake=1;go(true);}
+ if(action.launch!==undefined){selectedStake=1;go(true,action.launch/100);}
  showAuto();
 }
 if(auto){$('autoStart').onclick=()=>{sound?.unlock?.()?.then(showSound);if(art&&!ready)return;if(settingsOpen){closeSettings();if(state==='paused')pause();}if(state==='paused'){toast('Resume before starting AUTO');return;}cancelCharge();keys.left=keys.right=false;auto.begin({seed:$('autoSeed').value,runs:$('autoRuns').value,limit:$('autoLimit').value});study?.markAutomatic(auto.seed);sound?.cue('auto-start',.4);showAuto();};$('autoStop').onclick=()=>stopAuto('STOPPED');
@@ -310,10 +311,32 @@ if(auto){$('autoStart').onclick=()=>{sound?.unlock?.()?.then(showSound);if(art&&
 $('retry').onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();if(state!=='over'||settingsOpen||document.hidden||!$('gameOverPanel')||$('gameOverPanel').hidden)return;$('retry').disabled=true;stopAuto('MANUAL');start();$('settingsOpen').focus?.({preventScroll:true});};$('retry').onkeydown=e=>{if(e.repeat&&(e.key==='Enter'||e.key===' '))e.preventDefault();};
 $('start').onclick=()=>{stopAuto('MANUAL');start();};
 const launchButton=$('launch');
-launchButton.onclick=()=>go();
+function chargePower(ms){return .55+.45*Math.min(1,Math.max(0,ms)/1200);}
+function cancelGoHold(){goHold=null;sound?.charge(0,false);}
+function beginGoHold(source,now=performance.now()){
+ if(goHold||!canLaunch())return false;stopAuto('MANUAL');sound?.unlock?.()?.then(showSound);goClickBlockedUntil=now+3000;goHold={source,started:now,power:.55};return true;
+}
+function finishGoHold(source,now=performance.now()){
+ if(!goHold||goHold.source!==source)return false;const power=chargePower(now-goHold.started);goClickBlockedUntil=now+500;cancelGoHold();return go(false,power);
+}
+function manualFlippers(){for(const side of ['left','right'])setFlipper(side,[...manualPointers.values()].includes(side)||[...manualKeys].some(k=>(k==='ArrowLeft'||k==='KeyA'?'left':'right')===side));}
+function clearManualInput(){cancelGoHold();manualPointers.clear();manualKeys.clear();keys.left=keys.right=false;}
+function touchFlipper(id,x,y){if(settingsOpen||document.hidden||!['ready','play','launch','roulette'].includes(state)||x<0||x>941||y<200||y>1430||(rouletteResult&&Math.abs(y-836)<150))return false;stopAuto('MANUAL');manualPointers.set(id,x<470.5?'left':'right');manualFlippers();return true;}
+function releaseFlipper(id){manualPointers.delete(id);manualFlippers();}
+launchButton.onpointerdown=e=>{if(e.button!==undefined&&e.button!==0)return;e.preventDefault();e.stopPropagation();if(beginGoHold(e.pointerId))launchButton.setPointerCapture?.(e.pointerId);};
+launchButton.onpointerup=e=>{e.preventDefault();e.stopPropagation();finishGoHold(e.pointerId);launchButton.releasePointerCapture?.(e.pointerId);};
+for(const name of ['pointercancel','lostpointercapture'])launchButton.addEventListener?.(name,e=>{if(goHold?.source===e.pointerId)cancelGoHold();});
+launchButton.onkeydown=e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();if(!e.repeat)beginGoHold('keyboard:'+e.code);}};
+launchButton.onkeyup=e=>{if(e.code==='Space'||e.code==='Enter'){e.preventDefault();finishGoHold('keyboard:'+e.code);}};
+launchButton.onclick=e=>{e?.preventDefault?.();e?.stopPropagation?.();if(e?.detail===0&&!goHold&&performance.now()>goClickBlockedUntil)go(false,.55);};
+$('gameSurface').addEventListener?.('pointerdown',e=>{if(e.target?.closest?.('button,input,select,header,.bet-ledger,.go-dock,#settingsDialog,#gameOverPanel'))return;const r=canvas.boardRect?.()||canvas.getBoundingClientRect(),x=(e.clientX-r.left)*941/r.width,y=(e.clientY-r.top)*1672/r.height;if(touchFlipper(e.pointerId,x,y)){e.preventDefault();$('gameSurface').setPointerCapture?.(e.pointerId);}});
+for(const name of ['pointerup','pointercancel','lostpointercapture'])$('gameSurface').addEventListener?.(name,e=>releaseFlipper(e.pointerId));
+window.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','KeyA','KeyD'].includes(e.code)||e.target?.closest?.('input,select,summary,[role=dialog]')||settingsOpen)return;e.preventDefault();stopAuto('MANUAL');manualKeys.add(e.code);manualFlippers();});
+window.addEventListener('keyup',e=>{if(manualKeys.delete(e.code)){e.preventDefault();manualFlippers();}});
+window.addEventListener('blur',clearManualInput);window.addEventListener('pagehide',clearManualInput);document.addEventListener?.('visibilitychange',()=>{if(document.hidden)clearManualInput();});
 if($('stakeSelector'))$('stakeSelector').onclick=cycleStake;
 $('pause').onclick=()=>{if(!settingsOpen){pause();return;}if(settingsResume==='paused')settingsResume=prior;else{prior=settingsResume;settingsResume='paused';}$('pause').textContent=settingsResume==='paused'?'Keep paused: ON':'Keep paused: OFF';};
-function openSettings(){if(settingsOpen)return;settingsResume=state;stopAuto('SETTINGS');cancelCharge();keys.left=keys.right=false;settingsOpen=true;state='paused';sound?.pause(true);$('settingsDialog').hidden=false;$('gameSurface').inert=true;$('pause').textContent=settingsResume==='paused'?'Keep paused: ON':'Keep paused: OFF';$('settingsClose').focus?.();syncGo();}
+function openSettings(){if(settingsOpen)return;clearManualInput();settingsResume=state;stopAuto('SETTINGS');cancelCharge();keys.left=keys.right=false;settingsOpen=true;state='paused';sound?.pause(true);$('settingsDialog').hidden=false;$('gameSurface').inert=true;$('pause').textContent=settingsResume==='paused'?'Keep paused: ON':'Keep paused: OFF';$('settingsClose').focus?.();syncGo();}
 function closeSettings(){if(!settingsOpen)return;settingsOpen=false;$('settingsDialog').hidden=true;$('restartConfirm').hidden=true;$('studyDeleteConfirm').hidden=true;$('gameSurface').inert=false;if(settingsResume==='paused')state='paused';else if(document.hidden){prior=settingsResume;state='paused';}else state=settingsResume;keys.left=keys.right=false;acc=0;prev=performance.now();sound?.pause(state==='paused');syncGo();$('settingsOpen').focus?.();}
 $('settingsOpen').onclick=openSettings;$('settingsClose').onclick=closeSettings;
 $('restartRequest').onclick=()=>{$('restartConfirm').hidden=false;$('restartCancel').focus?.();};$('restartCancel').onclick=()=>{$('restartConfirm').hidden=true;$('restartRequest').focus?.();};$('restartConfirmButton').onclick=()=>{closeSettings();stopAuto('MANUAL');start();};
@@ -336,7 +359,7 @@ window.addEventListener('keydown',e=>{if(settingsOpen)return;if(e.target?.matche
 window.addEventListener('blur',()=>{cancelCharge();keys.left=keys.right=false;if(['play','launch','ready','roulette','settling'].includes(state))pause();});
 function physics(dt){
  if(settingsOpen)return;if(['paused','intro','over','settling'].includes(state)||document.hidden){if(state==='over'||state==='intro')autoStep(dt);return;}
- autoStep(dt);if(state==='paused'||state==='over')return;automaticFlippers(dt);
+ autoStep(dt);if(state==='paused'||state==='over')return;if(auto?.running)automaticFlippers(dt);
  for(const entry of settlementHistory){entry.followupElapsed+=dt;const target=entry.followups.length===0?1:3;if(entry.followups.length<2&&entry.followupElapsed>=target)entry.followups.push({afterSeconds:target,stock:balls,hud:$('balls').textContent,state,live:liveBalls.length,captured:roulette.owner,reservations:goReservations,launched:goLaunched});}
  if(study?.current)study.tick(dt,['play','launch','roulette'].includes(state));
  animateRoulette(dt);recoil=Math.max(0,recoil-dt);
@@ -434,7 +457,7 @@ function render(dt){renderSubmissions++;
  for(const t of particles.slice(-powerBudget().coins))art.draw('coin',t.x,t.y,t.size*Math.max(.16,Math.abs(Math.cos(t.angle*2))),t.size,{angle:.2*Math.sin(t.angle),opacity:Math.min(1,t.life*4),brightness:1.1});
  for(const b of visible)art.draw('ball',b.x,b.y,b.r*2,b.r*2);
  feedback?.drawReels?.(boardViewport);
- ui?.draw(feedback,boardViewport,state==='over'?null:rouletteResult,state==='over'?gameOverAge:null);
+ ui?.draw(feedback,boardViewport,state==='over'?null:rouletteResult,state==='over'?gameOverAge:null,goHold?.power??null);
  if(globalThis.pinballStartup?.complete({boardReady:ready,sceneReady:!scene||scene.ready,uiReady:!!ui?.ready,drawCalls:ui?.stats?.drawCalls,contextLost:contextLost||gl.isContextLost()}))syncGo();
  if(false && debugPhysics){
   gl.useProgram(p);gl.bindBuffer(gl.ARRAY_BUFFER,buf);
@@ -445,6 +468,7 @@ function render(dt){renderSubmissions++;
 }
 
 function updatePresentation(dt){
+ if(goHold){if(!canLaunch())cancelGoHold();else{goHold.power=chargePower(performance.now()-goHold.started);sound?.charge(goHold.power,true);}}
  if(state==='over'&&!settingsOpen&&!document.hidden)gameOverAge=Math.min(.25,gameOverAge+Math.max(0,dt));
  if(rouletteResult&&state!=='paused'&&!settingsOpen&&!document.hidden){rouletteResult.age+=Math.max(0,dt);if(rouletteResult.age>=rouletteResult.duration)rouletteResult=null;}
  art?.advance?.(dt,!!feedback?.reduced);
@@ -487,7 +511,7 @@ function frame(now){
   if(key!==frozenRenderKey){render(0);frozenRenderKey=key;}
  }else{frozenRenderKey=null;const interval=1000/powerBudget().fps;if(now-lastDraw>=interval-.5){render(0);lastDraw=Number.isFinite(lastDraw)?lastDraw+Math.max(1,Math.floor((now-lastDraw+.5)/interval))*interval:now;}}
  if(!document.hidden&&state!=='paused'){frameCosts.push(performance.now()-workStart);frameIntervals.push((now-prevFrameTime)||0);if(frameCosts.length>600){frameCosts.shift();frameIntervals.shift();}}
- prevFrameTime=now;if(now-perfLast>1000){perfLast=now;const quantile=(a,p)=>{const b=[...a].sort((x,y)=>x-y);return b.length?+b[Math.floor((b.length-1)*p)].toFixed(2):null;};const node=$('performanceReport');if(node)node.textContent=JSON.stringify({build:'2026-10-25-overflow100-v1',renderSubmissions,ui:ui?.stats||null,power:{...powerBudget(),backingWidth:canvas.width,backingHeight:canvas.height,boardViewport:scene?.measure().viewport||[0,0,canvas.width,canvas.height]},version:'go-ammo-v4+stake-v1+rain-v1',exactTotals:{score,best,ammo:balls,bets:{...rules.bets},spinMultiplier:rules.multiplier},multiball:{ammoStock:balls,goReservations:goReservations,goLaunched:goLaunched,ammoAwarded,rainPending,rainLaunched,overflowScore,live:liveBalls.length,peak:peakLive,contacts:world.ballContacts||0,cap:MAX_LIVE_BALLS,ids:liveBalls.map(b=>b.id),selectedStake,stakes:liveBalls.map(b=>({id:b.id,stake:b.stakeMultiplier})),reservedStakes:goStakes.map(r=>r.stake),stakeHistory,settlementHistory},characterEvent:art?.skin?.eventReport?.()??null,cadence:{source:'requestAnimationFrame timestamp differences, not screenshot polling',focused:document.hasFocus?.()??null,visibility:document.visibilityState??null,independentSamples:probe.raf.length,independentMedianMs:quantile(probe.raf,.5),independentP95Ms:quantile(probe.raf,.95),longTaskSupported:probe.supported,longTasks:probe.tasks,events:probe.events,elapsedMs:Math.round(performance.now()-probe.started)},samples:frameCosts.length,workMedianMs:quantile(frameCosts,.5),workP95Ms:quantile(frameCosts,.95),intervalMedianMs:quantile(frameIntervals,.5),intervalP95Ms:quantile(frameIntervals,.95),state,fastTest:perfMode,auto:auto?{running:auto.running,reason:auto.reason,completed:auto.completed,history:auto.history}:null,skinTime:art?.skin?.time,reduced:!!feedback?.reduced,hidden:!!document.hidden},null,2);}
+ prevFrameTime=now;if(now-perfLast>1000){perfLast=now;const quantile=(a,p)=>{const b=[...a].sort((x,y)=>x-y);return b.length?+b[Math.floor((b.length-1)*p)].toFixed(2):null;};const node=$('performanceReport');if(node)node.textContent=JSON.stringify({build:'2026-10-25-manual-charge-v1',renderSubmissions,ui:ui?.stats||null,power:{...powerBudget(),backingWidth:canvas.width,backingHeight:canvas.height,boardViewport:scene?.measure().viewport||[0,0,canvas.width,canvas.height]},version:'go-ammo-v4+stake-v1+rain-v1',exactTotals:{score,best,ammo:balls,bets:{...rules.bets},spinMultiplier:rules.multiplier},multiball:{ammoStock:balls,goReservations:goReservations,goLaunched:goLaunched,ammoAwarded,rainPending,rainLaunched,overflowScore,live:liveBalls.length,peak:peakLive,contacts:world.ballContacts||0,cap:MAX_LIVE_BALLS,ids:liveBalls.map(b=>b.id),selectedStake,stakes:liveBalls.map(b=>({id:b.id,stake:b.stakeMultiplier})),reservedStakes:goStakes.map(r=>r.stake),stakeHistory,settlementHistory},characterEvent:art?.skin?.eventReport?.()??null,cadence:{source:'requestAnimationFrame timestamp differences, not screenshot polling',focused:document.hasFocus?.()??null,visibility:document.visibilityState??null,independentSamples:probe.raf.length,independentMedianMs:quantile(probe.raf,.5),independentP95Ms:quantile(probe.raf,.95),longTaskSupported:probe.supported,longTasks:probe.tasks,events:probe.events,elapsedMs:Math.round(performance.now()-probe.started)},samples:frameCosts.length,workMedianMs:quantile(frameCosts,.5),workP95Ms:quantile(frameCosts,.95),intervalMedianMs:quantile(frameIntervals,.5),intervalP95Ms:quantile(frameIntervals,.95),state,fastTest:perfMode,auto:auto?{running:auto.running,reason:auto.reason,completed:auto.completed,history:auto.history}:null,skinTime:art?.skin?.time,reduced:!!feedback?.reduced,hidden:!!document.hidden},null,2);}
  if(state!=='paused'&&!document.hidden)wakeFrame();
 }
 const powerSelect=$('powerMode');if(powerSelect){powerSelect.value=powerMode;powerSelect.onchange=()=>{powerMode=powerSelect.value==='high'?'high':'low';try{localStorage.setItem('royal-flush-power-v1',powerMode);}catch{}frozenRenderKey=null;lastDraw=-Infinity;wakeFrame();};}

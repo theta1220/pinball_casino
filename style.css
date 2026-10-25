@@ -193,3 +193,6 @@ html.viewport-scene #game{position:fixed;inset:0;width:100vw;height:100dvh;z-ind
 /* Semantic hit targets only; visible game-over panel is in the shared WebGL UI. */
 #gameOverPanel{position:absolute;left:8%;top:39%;width:84%;height:24%;z-index:8;opacity:0!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3cqw;pointer-events:none}
 #gameOverPanel[hidden]{display:none}#gameOverPanel h2{margin:0;font-size:9cqw;line-height:1.2;text-align:center;width:100%}#retry{pointer-events:auto;width:60%;min-height:44px;height:12cqw;font-size:6cqw;touch-action:none;user-select:none;-webkit-touch-callout:none}
+
+/* Active play touch surface supports independent flipper fingers; settings retain scrolling. */
+#gameSurface .table{touch-action:none;user-select:none;-webkit-touch-callout:none}

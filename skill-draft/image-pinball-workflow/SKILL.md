@@ -132,3 +132,6 @@ Hide placeholder gameplay DOM and relocated canvas in critical inline HTML CSS b
 
 ## Bumper-wall corridor regression
 For an unintended bumper/wall trap, measure the free corridor against the full ball diameter and inspect the illustrated bevel before changing colliders. Correct the specific solid contact boundary before relying on timed rescue; preserve the opposite face and artwork where possible. Test both entry directions, slow/fast/oblique approaches and immutable stakes without recovery enabled. Separate legitimate repeated moving rebounds from resting-contact reward farming; assert stationary contacts do not emit repeated hits. Retain board collision, settlement and long multiball/rain regressions. The right-heart 6px bevel inset is a measured implementation value, not a universal user rule.
+
+## Current bumper and ledger acceptance
+Left upper BET bumper uses black pattern; right uses red. Preserve white/gold highlights, collision geometry and per-contact rewards. Verify shader material reset for unrelated sprites and both quality profiles. BLACK/BONUS/RED panels must reserve nine-slice corner plus padding; center actual decorated glyph ink (origin/baseline/shadow), not advance width alone. Validate compact values and narrow widths with separate label/value rows, then inspect actual board occlusion.
