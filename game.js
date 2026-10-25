@@ -142,7 +142,7 @@ function launchRandom(){launchSeed=(Math.imul(launchSeed,1664525)+1013904223)>>>
 function attachBall(b,phase='play'){b.id=nextBallId++;Object.defineProperty(b,'stakeMultiplier',{value:STAKE_TIERS.includes(b.stakeMultiplier)?b.stakeMultiplier:1,enumerable:true,writable:false});b.phase=phase;b.magic=typeof PinballMagicTrail==='undefined'?null:new PinballMagicTrail();b.stall={time:0,anchor:{x:b.x,y:b.y},count:0};liveBalls.push(b);peakLive=Math.max(peakLive,liveBalls.length);return b;}
 function awardBalls(n){if(!Number.isSafeInteger(n)||n<0||!Number.isSafeInteger(balls+n)||!Number.isSafeInteger(ammoAwarded+n))throw Error('Invalid ammunition award');balls+=n;ammoAwarded+=n;updateUI();syncGo();}
 function fleetState(){if(!liveBalls.length)return 'play';return liveBalls.some(b=>b.phase==='play')?'play':liveBalls.some(b=>b.phase==='launch')?'launch':liveBalls.some(b=>b.phase==='roulette')?'roulette':'ready';}
-function syncGo(){const options=affordableStake(),selector=$('stakeSelector');if(selector){setHudText(selector,'BET\nx'+selectedStake);selector.disabled=settingsOpen||state==='paused'||options.length===0;selector.setAttribute('aria-label','Launch stake x'+selectedStake+' - costs '+selectedStake+' ammunition');}const b=$('launch');if(!b)return;b.disabled=settingsOpen||state==='paused'||(art&&!ready)||(!['intro','over'].includes(state)&&balls<=0);b.setAttribute('aria-label',state==='over'?'GO next game':'GO launch - remaining '+balls+' balls');}
+function syncGo(){const options=affordableStake(),selector=$('stakeSelector');if(selector){setHudText(selector,'BET\nx'+selectedStake);const disabled=settingsOpen||state==='paused'||options.length===0;if(selector.disabled!==disabled)selector.disabled=disabled;selector.setAttribute('aria-label','Launch stake x'+selectedStake+' - costs '+selectedStake+' ammunition');}const b=$('launch');if(!b)return;const disabled=settingsOpen||state==='paused'||!!(art&&!ready)||(!['intro','over'].includes(state)&&balls<=0);if(b.disabled!==disabled)b.disabled=disabled;b.setAttribute('aria-label',state==='over'?'GO next game':'GO launch - remaining '+balls+' balls');}
 function go(diagnostic=false){
  if(!diagnostic)sound?.unlock?.()?.then(showSound);
  if(!diagnostic)stopAuto('MANUAL');else study?.markAutomatic(auto?.seed||1);
@@ -287,9 +287,9 @@ function physics(dt){
  syncRouletteGate();
  const scaled=dt*BALL_TIME_SCALE;
  roulette.cooldown=Math.max(0,roulette.cooldown-dt);
- for(const b of liveBalls)b.kinematic=b.phase!=='play';
+
  const free=liveBalls.filter(b=>b.phase==='play');
- world.stepMany(free,flippers,keys,scaled,b=>{ball=b;},liveBalls.filter(b=>b.kinematic));
+ world.stepMany(free,flippers,keys,scaled,b=>{ball=b;});
  for(const b of [...liveBalls]){
   ball=b;
   if(b.phase==='launch'){
@@ -312,7 +312,7 @@ function physics(dt){
   b.magic?.update(dt,b,b.phase,!!feedback?.reduced);
  }
  if(!liveBalls.length&&!goReservations){updateUI();if(balls>0)resetBall();else if(spinTime>0){state='settling';keys.left=keys.right=false;}else endGame();}
- else {state=fleetState();ball=liveBalls.filter(b=>b.phase==='play').sort((a,b)=>b.y-a.y)[0]||liveBalls[0]||ball;}
+ else {state=fleetState();let lowest=null;for(const b of liveBalls)if(b.phase==='play'&&(!lowest||b.y>lowest.y))lowest=b;ball=lowest||liveBalls[0]||ball;}
  syncGo();
 }
 $('debug').onclick=()=>{debugPhysics=!debugPhysics;$('debug').setAttribute('aria-pressed',String(debugPhysics));};
@@ -421,7 +421,7 @@ function frame(now){
   if(key!==frozenRenderKey){render(0);frozenRenderKey=key;}
  }else{frozenRenderKey=null;const interval=1000/powerBudget().fps;if(now-lastDraw>=interval-.5){render(0);lastDraw=Number.isFinite(lastDraw)?lastDraw+Math.max(1,Math.floor((now-lastDraw+.5)/interval))*interval:now;}}
  if(!document.hidden&&state!=='paused'){frameCosts.push(performance.now()-workStart);frameIntervals.push((now-prevFrameTime)||0);if(frameCosts.length>600){frameCosts.shift();frameIntervals.shift();}}
- prevFrameTime=now;if(now-perfLast>1000){perfLast=now;const quantile=(a,p)=>{const b=[...a].sort((x,y)=>x-y);return b.length?+b[Math.floor((b.length-1)*p)].toFixed(2):null;};const node=$('performanceReport');if(node)node.textContent=JSON.stringify({build:'2026-10-25-webgl-ui-v5',renderSubmissions,ui:ui?.stats||null,power:{...powerBudget(),backingWidth:canvas.width,backingHeight:canvas.height},version:'go-ammo-v3+stake-v1',exactTotals:{score,best,ammo:balls,bets:{...rules.bets},spinMultiplier:rules.multiplier},multiball:{ammoStock:balls,goReservations:goReservations,goLaunched:goLaunched,ammoAwarded,live:liveBalls.length,peak:peakLive,contacts:world.ballContacts||0,cap:MAX_LIVE_BALLS,ids:liveBalls.map(b=>b.id),selectedStake,stakes:liveBalls.map(b=>({id:b.id,stake:b.stakeMultiplier})),reservedStakes:goStakes.map(r=>r.stake),stakeHistory,settlementHistory},characterEvent:art?.skin?.eventReport?.()??null,cadence:{source:'requestAnimationFrame timestamp differences, not screenshot polling',focused:document.hasFocus?.()??null,visibility:document.visibilityState??null,independentSamples:probe.raf.length,independentMedianMs:quantile(probe.raf,.5),independentP95Ms:quantile(probe.raf,.95),longTaskSupported:probe.supported,longTasks:probe.tasks,events:probe.events,elapsedMs:Math.round(performance.now()-probe.started)},samples:frameCosts.length,workMedianMs:quantile(frameCosts,.5),workP95Ms:quantile(frameCosts,.95),intervalMedianMs:quantile(frameIntervals,.5),intervalP95Ms:quantile(frameIntervals,.95),state,fastTest:perfMode,auto:auto?{running:auto.running,reason:auto.reason,completed:auto.completed,history:auto.history}:null,skinTime:art?.skin?.time,reduced:!!feedback?.reduced,hidden:!!document.hidden},null,2);}
+ prevFrameTime=now;if(now-perfLast>1000){perfLast=now;const quantile=(a,p)=>{const b=[...a].sort((x,y)=>x-y);return b.length?+b[Math.floor((b.length-1)*p)].toFixed(2):null;};const node=$('performanceReport');if(node)node.textContent=JSON.stringify({build:'2026-10-25-no-ball-pairs-v1',renderSubmissions,ui:ui?.stats||null,power:{...powerBudget(),backingWidth:canvas.width,backingHeight:canvas.height},version:'go-ammo-v3+stake-v1',exactTotals:{score,best,ammo:balls,bets:{...rules.bets},spinMultiplier:rules.multiplier},multiball:{ammoStock:balls,goReservations:goReservations,goLaunched:goLaunched,ammoAwarded,live:liveBalls.length,peak:peakLive,contacts:world.ballContacts||0,cap:MAX_LIVE_BALLS,ids:liveBalls.map(b=>b.id),selectedStake,stakes:liveBalls.map(b=>({id:b.id,stake:b.stakeMultiplier})),reservedStakes:goStakes.map(r=>r.stake),stakeHistory,settlementHistory},characterEvent:art?.skin?.eventReport?.()??null,cadence:{source:'requestAnimationFrame timestamp differences, not screenshot polling',focused:document.hasFocus?.()??null,visibility:document.visibilityState??null,independentSamples:probe.raf.length,independentMedianMs:quantile(probe.raf,.5),independentP95Ms:quantile(probe.raf,.95),longTaskSupported:probe.supported,longTasks:probe.tasks,events:probe.events,elapsedMs:Math.round(performance.now()-probe.started)},samples:frameCosts.length,workMedianMs:quantile(frameCosts,.5),workP95Ms:quantile(frameCosts,.95),intervalMedianMs:quantile(frameIntervals,.5),intervalP95Ms:quantile(frameIntervals,.95),state,fastTest:perfMode,auto:auto?{running:auto.running,reason:auto.reason,completed:auto.completed,history:auto.history}:null,skinTime:art?.skin?.time,reduced:!!feedback?.reduced,hidden:!!document.hidden},null,2);}
  if(state!=='paused'&&!document.hidden)wakeFrame();
 }
 const powerSelect=$('powerMode');if(powerSelect){powerSelect.value=powerMode;powerSelect.onchange=()=>{powerMode=powerSelect.value==='high'?'high':'low';try{localStorage.setItem('royal-flush-power-v1',powerMode);}catch{}frozenRenderKey=null;lastDraw=-Infinity;wakeFrame();};}

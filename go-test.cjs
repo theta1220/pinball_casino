@@ -11,6 +11,7 @@ liveBalls=[];attachBall({x:300,y:1150,vx:0,vy:0,r:17},'play');attachBall({x:600,
 // All drained, with stock/queues exhausted, then GO starts a clean new game exactly once.
 goReservations=0;balls=0;for(const b of liveBalls){b.x=470;b.y=1500;}physics(1/240);assert.equal(state,'over');assert(go());assert.equal(balls,9);assert.equal(goReservations,1);assert.equal(ammoAwarded,0);
 start();auto.begin({seed:7,runs:1,limit:10});go(true);assert.equal(balls,9);go();assert(!auto.running);assert.equal(study.current.mode,'mixed-auto');
+start();let disabledWrites=0;for(const id of ['launch','stakeSelector']){const e=$(id);let value=e.disabled;Object.defineProperty(e,'disabled',{get:()=>value,set:v=>{disabledWrites++;value=v},configurable:true});}for(let i=0;i<100;i++)syncGo();assert.equal(disabledWrites,0);balls=0;syncGo();assert.equal(disabledWrites,2);awardBalls(5);assert.equal($('launch').disabled,false);assert.equal($('stakeSelector').disabled,false);console.log('PASS unchanged GO state avoids disabled writes; zero-stock/reward transitions preserved');
 console.log('PASS GO stock10, click single-consumption, blocked launch queue, normal/reward concurrency, pause, autonomous two-sided flippers, manual classification, replay and diagnostic takeover');
 `,ctx);
 const source=fs.readFileSync('game.js','utf8');assert(source.includes('launchButton.onclick=()=>go()'));assert(!source.includes('launchButton.onpointerdown='));const html=fs.readFileSync('index.html','utf8');assert(html.includes('class="go-button"'));assert(html.includes('type="button">GO</button>'));

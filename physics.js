@@ -114,20 +114,13 @@
           if((target-f.a)*(target-next)<=0){f.a=target;f.omega=0;}else f.a=next;
         }
     }
-    ballContact(a,b){
-      const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),r=a.r+b.r;if(d>=r)return false;
-      const nx=d>1e-9?dx/d:1,ny=d>1e-9?dy/d:0;
-      const wa=a.kinematic?0:1,wb=b.kinematic?0:1,total=wa+wb;if(!total)return false;
-      const correction=(r-d+.0001)/total;a.x-=nx*correction*wa;a.y-=ny*correction*wa;b.x+=nx*correction*wb;b.y+=ny*correction*wb;
-      const vn=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
-      if(vn<0){const impulse=-(1+.9)*vn/total;a.vx-=impulse*nx*wa;a.vy-=impulse*ny*wa;b.vx+=impulse*nx*wb;b.vy+=impulse*ny*wb;}
-      this.ballContacts=(this.ballContacts||0)+1;return true;
-    }
+    // Balls deliberately pass through each other; only board/flipper contacts remain.
     step(ball,flippers,keys,dt){return this.stepMany([ball],flippers,keys,dt);}
-    stepMany(balls,flippers,keys,dt,select=()=>{},constraints=[]){
+    stepMany(balls,flippers,keys,dt,select=()=>{}){
       const maxTip=flippers.reduce((v,f)=>Math.max(v,Math.abs(f.omega||0)*f.length),0);
-      const steps=Math.max(1,Math.ceil((Math.max(0,...balls.map(b=>Math.hypot(b.vx,b.vy)))+maxTip+2500)*dt/3));
-      const h=dt/steps;
+      let maxSpeed=0;for(const b of balls)maxSpeed=Math.max(maxSpeed,Math.hypot(b.vx,b.vy));
+      const steps=Math.max(1,Math.ceil((maxSpeed+maxTip+2500)*dt/3));
+      const h=dt/steps,loss=Math.exp(-this.drag*h),angularLoss=Math.exp(-.35*h);
       for(let step=0;step<steps;step++){
         this.time+=h;
         this.updateFlippers(flippers,keys,h);
@@ -138,7 +131,7 @@
         }):[];
         for(const ball of balls){select(ball);
         ball.vy+=this.gravity*h;
-        const loss=Math.exp(-this.drag*h);ball.vx*=loss;ball.vy*=loss;ball.omega=(ball.omega||0)*Math.exp(-.35*h);
+        ball.vx*=loss;ball.vy*=loss;ball.omega=(ball.omega||0)*angularLoss;
         this.move(ball,h);
         for(let pass=0;pass<3;pass++){
           for(let fi=0;fi<flippers.length;fi++){
@@ -150,8 +143,7 @@
         }
         ball.angle=(ball.angle||0)+(ball.omega||0)*h;
         }
-        for(let i=0;i<balls.length;i++)for(let j=i+1;j<balls.length;j++)this.ballContact(balls[i],balls[j]);
-        for(const b of balls)for(const constrained of constraints)this.ballContact(b,constrained);
+
       }
     }
   }

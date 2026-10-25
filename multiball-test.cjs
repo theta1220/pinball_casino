@@ -2,11 +2,9 @@
 const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');require('./physics.js');
 const {World}=PinballPhysics,b=(x,y,vx=0,vy=0)=>({x,y,vx,vy,r:17,omega:0,angle:0});
 const w=new World();w.gravity=w.drag=0;
-for(const speed of [100,2000,50000]){const a=b(-40,0,speed,70),c=b(40,0,-speed,70);w.stepMany([a,c],[],{},Math.max(.02,30/speed));assert(a.vx<0&&c.vx>0);assert.equal(a.vy,70);assert(Math.abs(a.vx)<=speed);}
-const a=b(0,0),c=b(0,0);w.ballContact(a,c);assert(Math.hypot(a.x-c.x,a.y-c.y)>=34);assert(Number.isFinite(a.x));assert.equal(a.vx,0);
-const dense=Array.from({length:12},(_,i)=>b((i%4)*34,Math.floor(i/4)*34,(i%2?1:-1)*200,20));let energy=dense.reduce((n,b)=>n+b.vx*b.vx+b.vy*b.vy,0);
-for(let i=0;i<1000;i++){w.stepMany(dense,[],{},1/240);const e=dense.reduce((n,b)=>n+b.vx*b.vx+b.vy*b.vy,0);assert(e<=energy+1e-6);energy=e;assert(dense.every(b=>Number.isFinite(b.x+b.y)));}
-console.log('PASS ball pairs: equal-mass impulse, tangential preservation, 50k px/s, coincident centers, dense energy bound');
+for(const speed of [100,2000,50000]){const a=b(-40,0,speed,70),c=b(40,0,-speed,70);w.stepMany([a,c],[],{},Math.max(.9,90/speed));assert.equal(a.vx,speed);assert.equal(c.vx,-speed);assert(a.x>c.x);assert.equal(a.vy,70);}
+const a=b(0,0),c=b(0,0);w.stepMany([a,c],[],{},1/240);assert.equal(a.x,c.x);assert.equal(a.y,c.y);assert.equal(w.ballContact,undefined);assert.equal(w.ballContacts||0,0);
+console.log('PASS balls cross/overlap without impulse or separation, including high speed; no pair solver');
 const gl=new Proxy({},{get:(_,k)=>k==='getShaderParameter'?()=>true:()=>({})}),els={};const el=id=>els[id]??={value:id==='autoSeed'?'2026':'developer',style:{setProperty(){}},setAttribute(){},querySelector:()=>({}),getContext:()=>gl};
 const ctx={PinballPhysics,document:{getElementById:el,querySelector:el,addEventListener(){}},window:{addEventListener(){}},localStorage:{getItem(){},setItem(){}},performance:{now:()=>0},requestAnimationFrame(){},console,Math,assert};vm.createContext(ctx);
 vm.runInContext(['rules.js','magic-trail.js','game.js'].map(f=>fs.readFileSync(f,'utf8')).join('\n')+`
