@@ -1,4 +1,5 @@
 // Display only: exact safe-integer gameplay values never round-trip through HUD text.
+function setHudText(element,text){if(typeof AtlasText!=='undefined')AtlasText.setText(element,text);else if(element.textContent!==text)element.textContent=text;}
 function compactNumber(value){if(!Number.isSafeInteger(value)||value<0)throw Error('Invalid display total');const units=['','K','M','G','T','P'];const n=BigInt(value);let unit=0,scale=1n;while(unit<units.length-1&&n>=scale*1000n){unit++;scale*=1000n;}let tenths=(n*10n+scale/2n)/scale;if(tenths>=10000n&&unit<units.length-1){unit++;scale*=1000n;tenths=(n*10n+scale/2n)/scale;}return String(tenths/10n)+'.'+String(tenths%10n)+units[unit];}
 const $=id=>document.getElementById(id),canvas=$('game'),gl=canvas.getContext('webgl',{antialias:true,alpha:false});
 if(!gl){$('overlay').innerHTML='<h2>WebGL unavailable</h2><p>This game requires a browser with WebGL support.</p>';throw Error('WebGL unavailable');}
@@ -19,7 +20,7 @@ const cues=typeof PinballCues==='undefined'?null:new PinballCues();
 const auto=typeof PinballAuto==='undefined'?null:new PinballAuto();
 const magic=typeof PinballMagicTrail==='undefined'?null:new PinballMagicTrail();
 const study=typeof PinballEngagement==='undefined'?null:new PinballEngagement((()=>{try{return globalThis.localStorage;}catch{return null;}})());
-function updateGoals(){if($('betBlack'))$('betBlack').textContent=compactNumber(rules.bets.black);if($('betRed'))$('betRed').textContent=compactNumber(rules.bets.red);if($('betMultiplier'))$('betMultiplier').textContent='BONUS\nx'+rules.multiplier;}
+function updateGoals(){if($('betBlack'))setHudText($('betBlack'),compactNumber(rules.bets.black));if($('betRed'))setHudText($('betRed'),compactNumber(rules.bets.red));if($('betMultiplier'))setHudText($('betMultiplier'),'BONUS\nx'+rules.multiplier);}
 function showStudy(){if($('studyOutput')&&study){const report=study.report();if($('returnSummary'))$('returnSummary').textContent=Object.entries(report.longTermReturn.windows).map(([day,w])=>day+' (by initial mode): '+['all','manual-only','auto-only','mixed-auto'].map((mode,i)=>{const g=w.groups[mode];return ['All','Manual','Automatic','Mixed'][i]+' '+g.numerator+'/'+g.denominator+' / pending'+g.pending+' / n='+g.sampleSize;}).join(' / ')).join(' | ');$('studyOutput').textContent=JSON.stringify(report,null,2);if($('studySummary'))$('studySummary').textContent=['all','manual-only','auto-only','mixed-auto'].map((key,i)=>{const g=report.continuation[key];return ['All','Manual only','Automatic only','Mixed'][i]+': '+g.numerator+'/'+g.denominator+' ('+(g.rate===null?'No data':Math.round(g.rate*100)+'%')+')';}).join(' | ');}}
 if(study){$('studyEnabled').onchange=e=>{study.enable(e.target.checked);showStudy();};$('studyReport').onclick=showStudy;$('studyClear').onclick=()=>{$('studyDeleteConfirm').hidden=false;$('studyDeleteCancel').focus?.();};window.addEventListener('pagehide',()=>study.interrupt());window.addEventListener('blur',()=>study.interrupt());document.addEventListener?.('visibilitychange',()=>{if(document.hidden)study.interrupt();});}
 let studyClock=performance.now();
@@ -28,7 +29,7 @@ let spinResult=['7','♥','♦'],spinElapsed=0,resultHold=0;
 let fxSeed=713;function fxRandom(){fxSeed^=fxSeed<<13;fxSeed^=fxSeed>>>17;fxSeed^=fxSeed<<5;return (fxSeed>>>0)/4294967296;}
 let settingsOpen=false,settingsResume='intro';
 let score=0,best=0,balls=10,state='intro',prior='ready',muted=false,ctx,toastTime=0,spinTime=0,spinCooldown=0,keys={left:false,right:false},particles=[];
-try{best=Number(localStorage.getItem('royal-flush-best-v3'))||0;}catch{}$('best').textContent=compactNumber(best);
+try{best=Number(localStorage.getItem('royal-flush-best-v3'))||0;}catch{}setHudText($('best'),compactNumber(best));
 const {World,ellipse}=PinballPhysics;
 // Coordinates traced in the original 941 x 1672 artwork. Closed outlines are solid.
 const rail=(id,points,extra={})=>({id,points,radius:3,restitution:.68,friction:.1,...extra});
@@ -132,7 +133,7 @@ function launchRandom(){launchSeed=(Math.imul(launchSeed,1664525)+1013904223)>>>
 function attachBall(b,phase='play'){b.id=nextBallId++;Object.defineProperty(b,'stakeMultiplier',{value:STAKE_TIERS.includes(b.stakeMultiplier)?b.stakeMultiplier:1,enumerable:true,writable:false});b.phase=phase;b.magic=typeof PinballMagicTrail==='undefined'?null:new PinballMagicTrail();b.stall={time:0,anchor:{x:b.x,y:b.y},count:0};liveBalls.push(b);peakLive=Math.max(peakLive,liveBalls.length);return b;}
 function awardBalls(n){if(!Number.isSafeInteger(n)||n<0||!Number.isSafeInteger(balls+n)||!Number.isSafeInteger(ammoAwarded+n))throw Error('Invalid ammunition award');balls+=n;ammoAwarded+=n;updateUI();syncGo();}
 function fleetState(){if(!liveBalls.length)return 'play';return liveBalls.some(b=>b.phase==='play')?'play':liveBalls.some(b=>b.phase==='launch')?'launch':liveBalls.some(b=>b.phase==='roulette')?'roulette':'ready';}
-function syncGo(){const options=affordableStake(),selector=$('stakeSelector');if(selector){if(selector.textContent!=='BET\nx'+selectedStake)selector.textContent='BET\nx'+selectedStake;selector.disabled=settingsOpen||state==='paused'||options.length===0;selector.setAttribute('aria-label','Launch stake x'+selectedStake+' - costs '+selectedStake+' ammunition');}const b=$('launch');if(!b)return;b.disabled=settingsOpen||state==='paused'||(art&&!ready)||(!['intro','over'].includes(state)&&balls<=0);b.setAttribute('aria-label',state==='over'?'GO next game':'GO launch - remaining '+balls+' balls');}
+function syncGo(){const options=affordableStake(),selector=$('stakeSelector');if(selector){setHudText(selector,'BET\nx'+selectedStake);selector.disabled=settingsOpen||state==='paused'||options.length===0;selector.setAttribute('aria-label','Launch stake x'+selectedStake+' - costs '+selectedStake+' ammunition');}const b=$('launch');if(!b)return;b.disabled=settingsOpen||state==='paused'||(art&&!ready)||(!['intro','over'].includes(state)&&balls<=0);b.setAttribute('aria-label',state==='over'?'GO next game':'GO launch - remaining '+balls+' balls');}
 function go(diagnostic=false){
  if(!diagnostic)sound?.unlock?.()?.then(showSound);
  if(!diagnostic)stopAuto('MANUAL');else study?.markAutomatic(auto?.seed||1);
@@ -188,7 +189,7 @@ function recoverStall(dt){
 
 
 function toast(t){$('toast').textContent=t;toastTime=2;}
-function updateUI(){$('score').textContent=compactNumber(score);$('balls').textContent=compactNumber(balls);if(score>best){best=score;$('best').textContent=compactNumber(best);try{localStorage.setItem('royal-flush-best-v3',best);}catch{}}}
+function updateUI(){setHudText($('score'),compactNumber(score));setHudText($('balls'),compactNumber(balls));if(score>best){best=score;setHudText($('best'),compactNumber(best));try{localStorage.setItem('royal-flush-best-v3',best);}catch{}}}
 function add(n,x,y){
  if(!Number.isSafeInteger(n)||n<0||!Number.isSafeInteger(score+n))throw Error('Score exceeds safe integer range');score+=n;art?.react?.(n>=1500?1:.25);updateUI();feedback?.score(n,x,y);sound?.cue(n>=10000?'jackpot':n===250?'roulette':'bumper',1,x);
  if(!feedback?.reduced)for(let i=0;i<(n>=10000?30:7);i++){const a=fxRandom()*Math.PI*2,speed=95+fxRandom()*160;particles.push({x,y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed-180,life:.8,size:19+fxRandom()*13,angle:fxRandom()*6.28});}

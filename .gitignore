@@ -12,3 +12,6 @@ auto-results.json
 *CHECKPOINT*.md
 assets/*preview*.png
 assets/casino-panorama-v1.png
+
+flicker-fix-candidate/
+performance-fix-candidate/
