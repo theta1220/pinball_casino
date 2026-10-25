@@ -45,7 +45,7 @@ updateGoals();
 let spinResult=['7','♥','♦'],spinElapsed=0,resultHold=0;
 let fxSeed=713;function fxRandom(){fxSeed^=fxSeed<<13;fxSeed^=fxSeed>>>17;fxSeed^=fxSeed<<5;return (fxSeed>>>0)/4294967296;}
 let settingsOpen=false,settingsResume='intro';
-const STOCK_CAP=3;
+const STOCK_CAP=3,OVERFLOW_POINTS=100;
 let score=0,best=0,balls=STOCK_CAP,state='intro',prior='ready',muted=false,ctx,toastTime=0,spinTime=0,spinCooldown=0,keys={left:false,right:false},particles=[];
 try{best=Number(localStorage.getItem('royal-flush-best-v3'))||0;}catch{}setHudText($('best'),compactNumber(best));
 const {World,ellipse}=PinballPhysics;
@@ -115,7 +115,7 @@ function stepRoulette(dt){
  roulette.stable=settled?roulette.stable+dt:0;
  if(roulette.stable>=.3){
   ball.vx=0;ball.vy=0;roulette.phase='resolved';roulette.angularSpeed=0;roulette.cooldown=2.5;
-  study?.event('hit','roulette');const stockBefore=balls,launchesBefore=goLaunched;const result=rules.settleRoulette(roulette.settlementId,PinballRules.rouletteColor(roulette.orbit-roulette.angle),Math.min(Number.MAX_SAFE_INTEGER-balls,Number.MAX_SAFE_INTEGER-ammoAwarded,Math.max(0,Math.floor((Number.MAX_SAFE_INTEGER-score)/10)-Math.max(0,balls-STOCK_CAP))));if(result?.award){art?.skin?.celebrate?.();awardBalls(result.award,true);}if(result){showRouletteResult(result);settlementHistory.push({...result,owner:ball.id,stockBefore,stockAfterCredit:stockBefore+result.award,stockAfter:balls,rainPending,rainLaunched,launchesBefore,launchesAfter:goLaunched,relativeAngle:roulette.orbit-roulette.angle,liveAtCredit:liveBalls.map(b=>({id:b.id,phase:b.phase,stake:b.stakeMultiplier})),reservationsAtCredit:goReservations,followups:[],followupElapsed:0});if(settlementHistory.length>20)settlementHistory.shift();}syncRouletteGate();updateGoals();
+  study?.event('hit','roulette');const stockBefore=balls,launchesBefore=goLaunched;const result=rules.settleRoulette(roulette.settlementId,PinballRules.rouletteColor(roulette.orbit-roulette.angle),Math.min(Number.MAX_SAFE_INTEGER-balls,Number.MAX_SAFE_INTEGER-ammoAwarded,Math.max(0,Math.floor((Number.MAX_SAFE_INTEGER-score)/OVERFLOW_POINTS)-Math.max(0,balls-STOCK_CAP))));if(result?.award){art?.skin?.celebrate?.();awardBalls(result.award,true);}if(result){showRouletteResult(result);settlementHistory.push({...result,owner:ball.id,stockBefore,stockAfterCredit:stockBefore+result.award,stockAfter:balls,rainPending,rainLaunched,launchesBefore,launchesAfter:goLaunched,relativeAngle:roulette.orbit-roulette.angle,liveAtCredit:liveBalls.map(b=>({id:b.id,phase:b.phase,stake:b.stakeMultiplier})),reservationsAtCredit:goReservations,followups:[],followupElapsed:0});if(settlementHistory.length>20)settlementHistory.shift();}syncRouletteGate();updateGoals();
   roulette.light=2.2;reactions?.hit('roulette',.7,ball.x,ball.y);
   roulette.releaseWait=.45;
  }
@@ -157,20 +157,20 @@ function launchRandom(){launchSeed=(Math.imul(launchSeed,1664525)+1013904223)>>>
 function attachBall(b,phase='play'){b.id=nextBallId++;Object.defineProperty(b,'stakeMultiplier',{value:STAKE_TIERS.includes(b.stakeMultiplier)?b.stakeMultiplier:1,enumerable:true,writable:false});b.phase=phase;b.magic=typeof PinballMagicTrail==='undefined'?null:new PinballMagicTrail();b.stall={time:0,anchor:{x:b.x,y:b.y},count:0};liveBalls.push(b);peakLive=Math.max(peakLive,liveBalls.length);return b;}
 function occupiedSlots(){return liveBalls.length===1&&liveBalls[0].phase==='ready'?0:liveBalls.length;}
 function committedSlots(){return occupiedSlots()+goReservations+rainPending;}
-function creditOverflow(units){const n=units*10;if(!n)return;if(!Number.isSafeInteger(n)||n<0||!Number.isSafeInteger(score+n))throw Error('Overflow score exceeds safe integer range');score+=n;overflowScore+=n;updateUI();}
+function creditOverflow(units){const n=units*OVERFLOW_POINTS;if(!n)return;if(!Number.isSafeInteger(n)||n<0||!Number.isSafeInteger(score+n))throw Error('Overflow score exceeds safe integer range');score+=n;overflowScore+=n;updateUI();}
 function trimCapacity(){
  if(committedSlots()<=MAX_LIVE_BALLS)return;
  const slots=Math.max(0,MAX_LIVE_BALLS-occupiedSlots());
  const keepGo=Math.min(goReservations,slots),keepRain=Math.min(rainPending,Math.max(0,slots-keepGo));
  const converted=goStakes.slice(keepGo).reduce((n,r)=>n+r.stake,0)+rainPending-keepRain;
- if(!Number.isSafeInteger(score+converted*10))throw Error('Overflow score exceeds safe integer range');
+ if(!Number.isSafeInteger(score+converted*OVERFLOW_POINTS))throw Error('Overflow score exceeds safe integer range');
  goStakes.length=keepGo;goReservations=keepGo;rainPending=keepRain;creditOverflow(converted);
 }
 function awardBalls(n,rouletteReward=false){
  if(!Number.isSafeInteger(n)||n<0||!Number.isSafeInteger(balls+n)||!Number.isSafeInteger(ammoAwarded+n))throw Error('Invalid ammunition award');
  const reserve=Math.max(0,balls+n-STOCK_CAP);
  const accepted=rouletteReward?Math.min(reserve,Math.max(0,MAX_LIVE_BALLS-committedSlots())):0,converted=reserve-accepted;
- if(!Number.isSafeInteger(score+converted*10))throw Error('Overflow score exceeds safe integer range');
+ if(!Number.isSafeInteger(score+converted*OVERFLOW_POINTS))throw Error('Overflow score exceeds safe integer range');
  balls+=n-reserve;ammoAwarded+=n;rainPending+=accepted;creditOverflow(converted);updateUI();syncGo();
 }
 function queueRain(dt){
@@ -487,7 +487,7 @@ function frame(now){
   if(key!==frozenRenderKey){render(0);frozenRenderKey=key;}
  }else{frozenRenderKey=null;const interval=1000/powerBudget().fps;if(now-lastDraw>=interval-.5){render(0);lastDraw=Number.isFinite(lastDraw)?lastDraw+Math.max(1,Math.floor((now-lastDraw+.5)/interval))*interval:now;}}
  if(!document.hidden&&state!=='paused'){frameCosts.push(performance.now()-workStart);frameIntervals.push((now-prevFrameTime)||0);if(frameCosts.length>600){frameCosts.shift();frameIntervals.shift();}}
- prevFrameTime=now;if(now-perfLast>1000){perfLast=now;const quantile=(a,p)=>{const b=[...a].sort((x,y)=>x-y);return b.length?+b[Math.floor((b.length-1)*p)].toFixed(2):null;};const node=$('performanceReport');if(node)node.textContent=JSON.stringify({build:'2026-10-25-gameover-retry-v1',renderSubmissions,ui:ui?.stats||null,power:{...powerBudget(),backingWidth:canvas.width,backingHeight:canvas.height,boardViewport:scene?.measure().viewport||[0,0,canvas.width,canvas.height]},version:'go-ammo-v4+stake-v1+rain-v1',exactTotals:{score,best,ammo:balls,bets:{...rules.bets},spinMultiplier:rules.multiplier},multiball:{ammoStock:balls,goReservations:goReservations,goLaunched:goLaunched,ammoAwarded,rainPending,rainLaunched,overflowScore,live:liveBalls.length,peak:peakLive,contacts:world.ballContacts||0,cap:MAX_LIVE_BALLS,ids:liveBalls.map(b=>b.id),selectedStake,stakes:liveBalls.map(b=>({id:b.id,stake:b.stakeMultiplier})),reservedStakes:goStakes.map(r=>r.stake),stakeHistory,settlementHistory},characterEvent:art?.skin?.eventReport?.()??null,cadence:{source:'requestAnimationFrame timestamp differences, not screenshot polling',focused:document.hasFocus?.()??null,visibility:document.visibilityState??null,independentSamples:probe.raf.length,independentMedianMs:quantile(probe.raf,.5),independentP95Ms:quantile(probe.raf,.95),longTaskSupported:probe.supported,longTasks:probe.tasks,events:probe.events,elapsedMs:Math.round(performance.now()-probe.started)},samples:frameCosts.length,workMedianMs:quantile(frameCosts,.5),workP95Ms:quantile(frameCosts,.95),intervalMedianMs:quantile(frameIntervals,.5),intervalP95Ms:quantile(frameIntervals,.95),state,fastTest:perfMode,auto:auto?{running:auto.running,reason:auto.reason,completed:auto.completed,history:auto.history}:null,skinTime:art?.skin?.time,reduced:!!feedback?.reduced,hidden:!!document.hidden},null,2);}
+ prevFrameTime=now;if(now-perfLast>1000){perfLast=now;const quantile=(a,p)=>{const b=[...a].sort((x,y)=>x-y);return b.length?+b[Math.floor((b.length-1)*p)].toFixed(2):null;};const node=$('performanceReport');if(node)node.textContent=JSON.stringify({build:'2026-10-25-overflow100-v1',renderSubmissions,ui:ui?.stats||null,power:{...powerBudget(),backingWidth:canvas.width,backingHeight:canvas.height,boardViewport:scene?.measure().viewport||[0,0,canvas.width,canvas.height]},version:'go-ammo-v4+stake-v1+rain-v1',exactTotals:{score,best,ammo:balls,bets:{...rules.bets},spinMultiplier:rules.multiplier},multiball:{ammoStock:balls,goReservations:goReservations,goLaunched:goLaunched,ammoAwarded,rainPending,rainLaunched,overflowScore,live:liveBalls.length,peak:peakLive,contacts:world.ballContacts||0,cap:MAX_LIVE_BALLS,ids:liveBalls.map(b=>b.id),selectedStake,stakes:liveBalls.map(b=>({id:b.id,stake:b.stakeMultiplier})),reservedStakes:goStakes.map(r=>r.stake),stakeHistory,settlementHistory},characterEvent:art?.skin?.eventReport?.()??null,cadence:{source:'requestAnimationFrame timestamp differences, not screenshot polling',focused:document.hasFocus?.()??null,visibility:document.visibilityState??null,independentSamples:probe.raf.length,independentMedianMs:quantile(probe.raf,.5),independentP95Ms:quantile(probe.raf,.95),longTaskSupported:probe.supported,longTasks:probe.tasks,events:probe.events,elapsedMs:Math.round(performance.now()-probe.started)},samples:frameCosts.length,workMedianMs:quantile(frameCosts,.5),workP95Ms:quantile(frameCosts,.95),intervalMedianMs:quantile(frameIntervals,.5),intervalP95Ms:quantile(frameIntervals,.95),state,fastTest:perfMode,auto:auto?{running:auto.running,reason:auto.reason,completed:auto.completed,history:auto.history}:null,skinTime:art?.skin?.time,reduced:!!feedback?.reduced,hidden:!!document.hidden},null,2);}
  if(state!=='paused'&&!document.hidden)wakeFrame();
 }
 const powerSelect=$('powerMode');if(powerSelect){powerSelect.value=powerMode;powerSelect.onchange=()=>{powerMode=powerSelect.value==='high'?'high':'low';try{localStorage.setItem('royal-flush-power-v1',powerMode);}catch{}frozenRenderKey=null;lastDraw=-Infinity;wakeFrame();};}
