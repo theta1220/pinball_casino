@@ -185,3 +185,7 @@ html.webgl-ui #gameSurface>header,html.webgl-ui #settingsOpen,html.webgl-ui .bet
 html.webgl-ui .reel-window{background:none;box-shadow:none}html.webgl-ui input,html.webgl-ui select{min-height:32px}html.webgl-ui input[type=checkbox]{min-width:26px;min-height:26px}
 html.webgl-ui .settings label:has(input[type=checkbox]){display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;align-items:start}html.webgl-ui .settings label:has(input[type=checkbox]) input{margin:0}html.webgl-ui input[type=range]{touch-action:none}
 html.webgl-ui #settingsDialog input[inputmode=numeric],html.webgl-ui #settingsDialog select{width:100%;max-width:100%;min-width:0;box-sizing:border-box}
+
+/* Cached reflected surround, rendered in the existing WebGL context. */
+:root{--reflection-source:url(assets/reflection-backdrop.webp)}
+html.viewport-scene #game{position:fixed;inset:0;width:100vw;height:100dvh;z-index:0;pointer-events:none}html.viewport-scene main{position:relative;z-index:1;background:none}html.viewport-scene body{background:#081311}html.viewport-scene body::before{display:none}
