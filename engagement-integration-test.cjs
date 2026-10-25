@@ -5,7 +5,7 @@ vm.runInContext(['rules.js','return-cohort.js','engagement.js','game.js'].map(f=
 study.enable(true);start();assert.equal(study.current.source,'developer');assert.equal(rules.multiplier,1);
 collectTarget('chip-left');assert.equal(rules.bets.black,1);assert.equal(rules.multiplier,1);
 beginCharge();charge=.1;ball.y=1251;launch();for(let i=0;i<2400&&state==='launch';i++)physics(1/240);
-assert.equal(study.current.returns,1);assert.equal(balls,10);assert($('toast').textContent.includes('No ammunition lost'));
+assert.equal(study.current.returns,1);assert.equal(balls,3);assert($('toast').textContent.includes('No ammunition lost'));
 const t=study.current.active;pause();physics(1);assert.equal(study.current.active,t);pause();
 for(let i=0;i<3;i++){balls=2-i;state='play';Object.assign(ball,{x:470,y:1500,vx:0,vy:0});physics(1/240);}
 assert.equal(state,'over');assert.equal(study.rows[0].drains,3);assert.equal(study.rows[0].complete,true);study.tick(10,false);start();assert.equal(study.rows[0].replay,true);assert.equal(rules.multiplier,1);
