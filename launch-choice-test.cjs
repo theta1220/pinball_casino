@@ -6,6 +6,6 @@ for(const power of [0,.45,.6,.75,1]){
 }
 start();$('launchPowerChoice').value='100';launchChoice();const speed=launchSpeed;launchChoice();assert.equal(launchSpeed,speed);assert($('launchChoice').disabled);pause();launchChoice();assert.equal(state,'paused');assert($('launchChoice').disabled);pause();
 start();$('launchPowerChoice').value='NaN';launchChoice();assert.equal(state,'ready');$('launchPowerChoice').value='150';launchChoice();assert.equal(state,'ready');
-study.enable(true);start();study.event('launches');study.event('returns');study.finish(false);const g=study.report().groups['go-ammo-v4+stake-v1+rain-v3/developer'];assert.equal(g.riskUnscored,1);assert.equal(g.riskScored,0);assert.equal(g.returnedLaunches,1);assert.equal(g.launches,1);
+study.enable(true);start();study.event('launches');study.event('returns');study.finish(false);const g=study.report().groups['go-ammo-v4+stake-v1+rain-v3+go-ready-v1/developer'];assert.equal(g.riskUnscored,1);assert.equal(g.riskScored,0);assert.equal(g.returnedLaunches,1);assert.equal(g.launches,1);
 console.log('PASS selected launch matches held launch at 5 powers; guards, pause, repeat clicks, invalid input and missing-score coverage');
 `,c);
