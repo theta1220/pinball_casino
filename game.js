@@ -1,7 +1,11 @@
 // Display only: exact safe-integer gameplay values never round-trip through HUD text.
 function setHudText(element,text){if(typeof AtlasText!=='undefined')AtlasText.setText(element,text);else if(element.textContent!==text)element.textContent=text;}
 function compactNumber(value){if(!Number.isSafeInteger(value)||value<0)throw Error('Invalid display total');const units=['','K','M','G','T','P'];const n=BigInt(value);let unit=0,scale=1n;while(unit<units.length-1&&n>=scale*1000n){unit++;scale*=1000n;}let tenths=(n*10n+scale/2n)/scale;if(tenths>=10000n&&unit<units.length-1){unit++;scale*=1000n;tenths=(n*10n+scale/2n)/scale;}return String(tenths/10n)+'.'+String(tenths%10n)+units[unit];}
-const $=id=>document.getElementById(id),canvas=$('game'),gl=canvas.getContext('webgl',{antialias:true,alpha:false});
+let powerMode='low';try{if(localStorage.getItem('royal-flush-power-v1')==='high')powerMode='high';}catch{}
+const powerBudget=()=>typeof PinballPowerProfile==='undefined'?{mode:'high',fps:60,dpr:2,pixels:2000000,points:32,sparks:48,ghosts:6,coins:40}:PinballPowerProfile.settings(powerMode);
+let frameQueued=false,lastDraw=-Infinity;
+function wakeFrame(){if(!frameQueued){frameQueued=true;requestAnimationFrame(frame);}}
+const $=id=>document.getElementById(id),canvas=$('game'),gl=canvas.getContext('webgl',{antialias:false,alpha:false});
 if(!gl){$('overlay').innerHTML='<h2>WebGL unavailable</h2><p>This game requires a browser with WebGL support.</p>';throw Error('WebGL unavailable');}
 const W=941,H=1672;
 function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
@@ -11,7 +15,7 @@ function poly(points,c){gl.uniform1f(textured,0);gl.uniform4fv(color,c);gl.buffe
 function circle(x,y,r,c){const pts=[[x,y]];for(let i=0;i<=40;i++)pts.push([x+Math.cos(i/40*Math.PI*2)*r,y+Math.sin(i/40*Math.PI*2)*r]);poly(pts,c);}
 function capsule(x,y,xx,yy,r,c){const a=Math.atan2(yy-y,xx-x),pts=[];for(let i=0;i<=16;i++){let t=a+Math.PI/2+i*Math.PI/16;pts.push([x+Math.cos(t)*r,y+Math.sin(t)*r]);}for(let i=0;i<=16;i++){let t=a-Math.PI/2+i*Math.PI/16;pts.push([xx+Math.cos(t)*r,yy+Math.sin(t)*r]);}poly(pts,c);}
 let ready=false;
-const art=typeof SpriteRenderer==='undefined'?null:new SpriteRenderer(gl,PINBALL_ASSETS,()=>{ready=true;$('start').disabled=false;syncGo();},error=>{$('toast').textContent=error.message;});
+const art=typeof SpriteRenderer==='undefined'?null:new SpriteRenderer(gl,PINBALL_ASSETS,()=>{ready=true;$('start').disabled=false;syncGo();wakeFrame();},error=>{$('toast').textContent=error.message;});
 const sound=typeof PinballAudio==='undefined'?null:new PinballAudio();
 const reactions=typeof PinballReactions==='undefined'?null:new PinballReactions();
 const feedback=typeof PinballFeedback==='undefined'?null:new PinballFeedback();
@@ -309,10 +313,10 @@ function physics(dt){
 $('debug').onclick=()=>{debugPhysics=!debugPhysics;$('debug').setAttribute('aria-pressed',String(debugPhysics));};
 let renderSubmissions=0;
 function render(dt){renderSubmissions++;
- const dpr=Math.min(devicePixelRatio||1,2),width=Math.round(canvas.clientWidth*dpr),height=Math.round(canvas.clientHeight*dpr);
+ const target=typeof PinballPowerProfile==='undefined'?{width:Math.round(canvas.clientWidth*Math.min(devicePixelRatio||1,2)),height:Math.round(canvas.clientHeight*Math.min(devicePixelRatio||1,2))}:PinballPowerProfile.size(canvas.clientWidth,canvas.clientHeight,devicePixelRatio||1,powerMode),{width,height}=target;
  if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
  gl.viewport(0,0,width,height);gl.clearColor(.02,.1,.08,1);gl.clear(gl.COLOR_BUFFER_BIT);if(!ready)return;
- art.advance(dt,!!feedback?.reduced);art.begin();
+ art.lowPower=powerBudget().mode==='low';art.begin();
  // 1. Intact empty felt background, never covered by patches.
  art.draw('board-clean',W/2,H/2,W,H);
  const bartenderKey=art.skin.characterKey(),bartenderScale=art.assets[bartenderKey]?.drawScale||1;art.draw(bartenderKey,165,278,560*bartenderScale,560*bartenderScale);
@@ -348,7 +352,7 @@ function render(dt){renderSubmissions++;
  art.draw('spring',894,1438,48,58,{anchorY:0,slice:[.77,1]});
  // 6. Live ball; no painted ball exists in the background.
  const visible=liveBalls.length?liveBalls:[ball];
- let points=32,sparks=48,ghosts=6;
+ let {points,sparks,ghosts}=powerBudget();
  for(const b of visible){
  art.shadow('ball',b.x-3,b.y-5,b.r*2,b.r*2);
  const trail=b.magic;
@@ -359,7 +363,7 @@ function render(dt){renderSubmissions++;
  art.begin();for(const a of trail.points.filter((_,i)=>i%4===0).slice(-6)){if(ghosts--<=0)break;art.draw('ball',a.x,a.y,b.r*1.7,b.r*1.7,{opacity:.19*Math.max(0,1-a.age/.22)});}
  }
  }
- for(const t of particles)art.draw('coin',t.x,t.y,t.size*Math.max(.16,Math.abs(Math.cos(t.angle*2))),t.size,{angle:.2*Math.sin(t.angle),opacity:Math.min(1,t.life*4),brightness:1.1});
+ for(const t of particles.slice(-powerBudget().coins))art.draw('coin',t.x,t.y,t.size*Math.max(.16,Math.abs(Math.cos(t.angle*2))),t.size,{angle:.2*Math.sin(t.angle),opacity:Math.min(1,t.life*4),brightness:1.1});
  for(const b of visible)art.draw('ball',b.x,b.y,b.r*2,b.r*2);
  if(false && debugPhysics){
   gl.useProgram(p);gl.bindBuffer(gl.ARRAY_BUFFER,buf);
@@ -370,6 +374,7 @@ function render(dt){renderSubmissions++;
 }
 
 function updatePresentation(dt){
+ art?.advance?.(dt,!!feedback?.reduced);
  reactions?.update(dt);const kick=reactions?.offset(feedback?.reduced)||{x:0,y:0};feedback?.camera(kick.x,kick.y);feedback?.update(dt);sound?.charge(charge,charging&&state==='ready');
  if(resultHold>0&&spinTime===0){resultHold=Math.max(0,resultHold-dt);}
  spinCooldown=Math.max(0,spinCooldown-dt);
@@ -385,13 +390,13 @@ function updatePresentation(dt){
 if($('previewCharacter'))$('previewCharacter').onclick=()=>{if(settingsOpen)closeSettings();if(state!=='paused'){if(study?.current)study.current.previewUsed=true;art?.skin?.celebrate?.('diagnostic-preview');}};
 let prev=performance.now(),prevFrameTime=prev,acc=0;
 const probe={raf:[],tasks:[],events:[],last:null,started:performance.now(),supported:false};
-function probeFrame(t){if(probe.last!==null){probe.raf.push(t-probe.last);if(probe.raf.length>600)probe.raf.shift();}probe.last=t;requestAnimationFrame(probeFrame);}
-requestAnimationFrame(probeFrame);
 if(typeof PerformanceObserver!=='undefined'){try{const observer=new PerformanceObserver(list=>{for(const e of list.getEntries())probe.tasks.push({start:+e.startTime.toFixed(1),duration:+e.duration.toFixed(1)});probe.tasks=probe.tasks.slice(-100);});observer.observe({type:'longtask',buffered:true});probe.supported=true;}catch{}}
 for(const event of ['focus','blur','pageshow','pagehide'])window.addEventListener(event,()=>{probe.events.push({event,time:performance.now(),hidden:!!document.hidden,focused:document.hasFocus?.()??null});probe.events=probe.events.slice(-20);});
 const frameCosts=[],frameIntervals=[];let perfLast=0,perfMode=null;
 let frozenRenderKey=null;
 function frame(now){
+ frameQueued=false;
+ if(probe.last!==null){probe.raf.push(now-probe.last);if(probe.raf.length>600)probe.raf.shift();}probe.last=now;
  const workStart=performance.now();const currentPerfMode=!!(auto?.running&&$('autoFastTest')?.checked);if(currentPerfMode!==perfMode){frameCosts.length=frameIntervals.length=0;perfMode=currentPerfMode;}
  cues?.update({state,collected:rules.collected,returned:lastLaunchReturned,auto:!!auto?.running,reduced:!!feedback?.reduced,charging});
  if(study?.follow)study.tick(Math.max(0,(now-studyClock)/1000),false);studyClock=now;
@@ -401,15 +406,18 @@ function frame(now){
  else{acc+=dt;while(acc>=1/240){physics(1/240);acc-=1/240;}updatePresentation(dt);}}
  
  // Frozen scenes need a repaint only on entry, resize/DPR, asset load or motion preference change.
- // Keep RAF/timing bookkeeping alive; never accumulate hidden physics time.
+ // Sleep while paused/hidden; input, visibility and resize invalidate the frozen scene.
  if(document.hidden){frozenRenderKey=null;}
  else if(state==='paused'){
-  const key=[canvas.clientWidth,canvas.clientHeight,devicePixelRatio||1,ready,!!feedback?.reduced].join(':');
+  const key=[canvas.clientWidth,canvas.clientHeight,devicePixelRatio||1,ready,!!feedback?.reduced,powerMode].join(':');
   if(key!==frozenRenderKey){render(0);frozenRenderKey=key;}
- }else{frozenRenderKey=null;render(dt);}
+ }else{frozenRenderKey=null;const interval=1000/powerBudget().fps;if(now-lastDraw>=interval-.5){render(0);lastDraw=Number.isFinite(lastDraw)?lastDraw+Math.max(1,Math.floor((now-lastDraw+.5)/interval))*interval:now;}}
  if(!document.hidden&&state!=='paused'){frameCosts.push(performance.now()-workStart);frameIntervals.push((now-prevFrameTime)||0);if(frameCosts.length>600){frameCosts.shift();frameIntervals.shift();}}
- prevFrameTime=now;if(now-perfLast>1000){perfLast=now;const quantile=(a,p)=>{const b=[...a].sort((x,y)=>x-y);return b.length?+b[Math.floor((b.length-1)*p)].toFixed(2):null;};const node=$('performanceReport');if(node)node.textContent=JSON.stringify({build:'2026-10-25-atlas-continuity-performance-v3',renderSubmissions,version:'go-ammo-v3+stake-v1',exactTotals:{score,best,ammo:balls,bets:{...rules.bets},spinMultiplier:rules.multiplier},multiball:{ammoStock:balls,goReservations:goReservations,goLaunched:goLaunched,ammoAwarded,live:liveBalls.length,peak:peakLive,contacts:world.ballContacts||0,cap:MAX_LIVE_BALLS,ids:liveBalls.map(b=>b.id),selectedStake,stakes:liveBalls.map(b=>({id:b.id,stake:b.stakeMultiplier})),reservedStakes:goStakes.map(r=>r.stake),stakeHistory,settlementHistory},characterEvent:art?.skin?.eventReport?.()??null,cadence:{source:'requestAnimationFrame timestamp differences, not screenshot polling',focused:document.hasFocus?.()??null,visibility:document.visibilityState??null,independentSamples:probe.raf.length,independentMedianMs:quantile(probe.raf,.5),independentP95Ms:quantile(probe.raf,.95),longTaskSupported:probe.supported,longTasks:probe.tasks,events:probe.events,elapsedMs:Math.round(performance.now()-probe.started)},samples:frameCosts.length,workMedianMs:quantile(frameCosts,.5),workP95Ms:quantile(frameCosts,.95),intervalMedianMs:quantile(frameIntervals,.5),intervalP95Ms:quantile(frameIntervals,.95),state,fastTest:perfMode,auto:auto?{running:auto.running,reason:auto.reason,completed:auto.completed,history:auto.history}:null,skinTime:art?.skin?.time,reduced:!!feedback?.reduced,hidden:!!document.hidden},null,2);}
- requestAnimationFrame(frame);
+ prevFrameTime=now;if(now-perfLast>1000){perfLast=now;const quantile=(a,p)=>{const b=[...a].sort((x,y)=>x-y);return b.length?+b[Math.floor((b.length-1)*p)].toFixed(2):null;};const node=$('performanceReport');if(node)node.textContent=JSON.stringify({build:'2026-10-25-low-power-v4',renderSubmissions,power:{...powerBudget(),backingWidth:canvas.width,backingHeight:canvas.height},version:'go-ammo-v3+stake-v1',exactTotals:{score,best,ammo:balls,bets:{...rules.bets},spinMultiplier:rules.multiplier},multiball:{ammoStock:balls,goReservations:goReservations,goLaunched:goLaunched,ammoAwarded,live:liveBalls.length,peak:peakLive,contacts:world.ballContacts||0,cap:MAX_LIVE_BALLS,ids:liveBalls.map(b=>b.id),selectedStake,stakes:liveBalls.map(b=>({id:b.id,stake:b.stakeMultiplier})),reservedStakes:goStakes.map(r=>r.stake),stakeHistory,settlementHistory},characterEvent:art?.skin?.eventReport?.()??null,cadence:{source:'requestAnimationFrame timestamp differences, not screenshot polling',focused:document.hasFocus?.()??null,visibility:document.visibilityState??null,independentSamples:probe.raf.length,independentMedianMs:quantile(probe.raf,.5),independentP95Ms:quantile(probe.raf,.95),longTaskSupported:probe.supported,longTasks:probe.tasks,events:probe.events,elapsedMs:Math.round(performance.now()-probe.started)},samples:frameCosts.length,workMedianMs:quantile(frameCosts,.5),workP95Ms:quantile(frameCosts,.95),intervalMedianMs:quantile(frameIntervals,.5),intervalP95Ms:quantile(frameIntervals,.95),state,fastTest:perfMode,auto:auto?{running:auto.running,reason:auto.reason,completed:auto.completed,history:auto.history}:null,skinTime:art?.skin?.time,reduced:!!feedback?.reduced,hidden:!!document.hidden},null,2);}
+ if(state!=='paused'&&!document.hidden)wakeFrame();
 }
-syncGo();requestAnimationFrame(frame);
+const powerSelect=$('powerMode');if(powerSelect){powerSelect.value=powerMode;powerSelect.onchange=()=>{powerMode=powerSelect.value==='high'?'high':'low';try{localStorage.setItem('royal-flush-power-v1',powerMode);}catch{}frozenRenderKey=null;lastDraw=-Infinity;wakeFrame();};}
+for(const event of ['resize','pointerdown','keydown','change','click'])window.addEventListener(event,()=>{if(!document.hidden)wakeFrame();});
+document.addEventListener?.('visibilitychange',()=>{prev=performance.now();acc=0;probe.last=null;lastDraw=-Infinity;if(!document.hidden)wakeFrame();});
+syncGo();wakeFrame();
 

@@ -174,3 +174,7 @@ main{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-i
 @container(max-width:300px){#gameSurface>header{left:2%;right:24%;gap:6px}header strong{font-size:16px}header label{font-size:9px}#gameSurface header>div:not(.brand){padding:7px}.bet-ledger{left:3%;right:3%;top:17%;gap:6px}.bet-ledger>span{display:flex;flex-direction:column;align-items:center;padding:6px 8px;font-size:10px}.bet-ledger strong{font-size:15px}.bet-ledger>#betMultiplier{font-size:10px;padding:7px}.stock{min-width:60px;padding:8px;width:auto;right:1%}.stock #balls{font-size:15px}.stock label{font-size:9px}#stakeSelector{left:1%;font-size:14px;padding:6px;min-width:54px}#launch.go-button{width:32%;min-width:60px}#settingsDialog{border-width:24px}#settingsDialog .dialog-heading{gap:4px;flex-wrap:wrap}#settingsDialog .dialog-heading h2{font-size:20px}#settingsDialog button,#settingsDialog #pause{font-size:14px!important;padding:9px!important}#settingsDialog summary,#settingsDialog label{font-size:14px}}
 
 @container(min-width:301px) and (max-width:350px){.bet-ledger{font-size:10px;gap:7px}.bet-ledger>span{padding:6px 8px}.bet-ledger strong{font-size:16px}.bet-ledger>#betMultiplier{font-size:11px;padding:5px 8px}}
+
+/* Keep rapid GO taps in the game. The board still supports pinch zoom. */
+#gameSurface{touch-action:manipulation}
+#launch.go-button{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}

@@ -44,3 +44,5 @@ Background status correction: the generated side extension was rejected for a vi
 
 ## Publication
 The existing remote is https://github.com/theta1220/pinball_casino. Git LFS stores binary artwork/audio. Install Git LFS and run `git lfs pull` after cloning. Main pushes run tests and build a restricted static `_site` artifact before GitHub Pages deployment. Configure repository Pages source as GitHub Actions after authentication. `node build-site.cjs` requires an empty `_site`; it rejects LFS pointers. `build-info.json` identifies the deployed commit. Local `PLAY_OFFLINE.html` remains available via `npm run build:offline`, and is deliberately not duplicated in the website or Git. Private study/evidence files and unfinished background candidates are excluded. Publishing does not migrate local browser records.
+
+Low power is the default: 60 FPS presentation, DPR at most 1 and at most 400,000 canvas pixels. Settings > Sound and effects > Power mode can select 60 FPS high quality. Physics timing and rewards are independent; this is a workload reduction, not a measured iPhone temperature guarantee.
