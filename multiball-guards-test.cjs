@@ -10,7 +10,7 @@ for(const [color,angle,n] of [['black',0,4],['red',11,6],['green',271,10]]){
  assert.equal(balls,Math.min(n,9));assert.equal(score,0);assert.equal(goReservations,0);assert.equal(goLaunched,0);assert.equal(rules.multiplier,1);assert(world.shapes.find(s=>s.id==='roulette-rim').disabled);stepRoulette(.01);assert.equal(balls,Math.min(n,9));
  rainWait=100; // Isolate capture release; rain lifecycle has its own test.
  for(let i=0;i<120;i++)physics(1/240);assert.equal(owner.phase,'play');assert.equal(roulette.owner,null);assert.equal(goLaunched,0);assert.equal(liveBalls.length,2);
- awardBalls(7);assert.equal(balls,Math.min(n,9)+7);assert(go());assert.equal(balls,Math.min(n,9)+6);assert.equal(goReservations,1);awardBalls(5);assert.equal(goReservations,1);queueLaunch(1);assert.equal(goLaunched,1);
+ const expectedGo=committedSlots()<MAX_LIVE_BALLS?1:0;awardBalls(7);assert.equal(balls,Math.min(n,9)+7);assert(go());assert.equal(balls,Math.min(n,9)+6);assert.equal(goReservations,expectedGo);awardBalls(5);assert.equal(goReservations,expectedGo);queueLaunch(1);assert.equal(goLaunched,expectedGo);
 }
 start();balls=0;state='play';ball.phase='play';ball.x=470;ball.y=1100;physics(1/240);assert.notEqual(state,'over');awardBalls(2);assert(go());assert.equal(balls,1);pause();const stock=balls;physics(1);assert.equal(balls,stock);pause();
 goReservations=0;balls=0;liveBalls.forEach(b=>{b.phase='play';b.x=470;b.y=1500;});physics(1/240);assert.equal(state,'over');assert(go());assert.equal(balls,9);assert.equal(goReservations,1);assert.equal(goLaunched,0);
