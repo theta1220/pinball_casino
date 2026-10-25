@@ -189,3 +189,7 @@ html.webgl-ui #settingsDialog input[inputmode=numeric],html.webgl-ui #settingsDi
 /* Cached reflected surround, rendered in the existing WebGL context. */
 :root{--reflection-source:url(assets/reflection-backdrop.webp)}
 html.viewport-scene #game{position:fixed;inset:0;width:100vw;height:100dvh;z-index:0;pointer-events:none}html.viewport-scene main{position:relative;z-index:1;background:none}html.viewport-scene body{background:#081311}html.viewport-scene body::before{display:none}
+
+/* Semantic hit targets only; visible game-over panel is in the shared WebGL UI. */
+#gameOverPanel{position:absolute;left:8%;top:39%;width:84%;height:24%;z-index:8;opacity:0!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3cqw;pointer-events:none}
+#gameOverPanel[hidden]{display:none}#gameOverPanel h2{margin:0;font-size:9cqw;line-height:1.2;text-align:center;width:100%}#retry{pointer-events:auto;width:60%;min-height:44px;height:12cqw;font-size:6cqw;touch-action:none;user-select:none;-webkit-touch-callout:none}
