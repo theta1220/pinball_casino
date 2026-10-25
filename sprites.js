@@ -2,6 +2,10 @@
 class SpriteRenderer {
   constructor(gl,manifest,onReady,onError){
     this.gl=gl;this.assets={};this.skin=new PinballIdleSkin();
+    // Reuse CPU staging storage; double precision grid preserves original math.
+    this.vertexGrid=new Float64Array(36*4);
+    this.quadVertices=new Float32Array(6*4);
+    this.meshVertices=new Float32Array(25*6*4);
     const compile=(type,src)=>{const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;};
     this.program=gl.createProgram();
     gl.attachShader(this.program,compile(gl.VERTEX_SHADER,'attribute vec2 a;attribute vec2 uv;uniform vec2 res;varying vec2 v;varying vec2 surface;void main(){surface=a/res;gl_Position=vec4(a.x/res.x*2.-1.,1.-a.y/res.y*2.,0,1);v=uv;}'));
@@ -37,14 +41,28 @@ class SpriteRenderer {
     const asset=this.assets[key];if(!asset)return;
     const gl=this.gl;let [x0,y0,x1,y1]=asset.bounds;
     if(asset.frames){const frame=asset.frames[this.skin.frame(asset,key)];[x0,y0,x1,y1]=frame;const anchor=asset.frameAnchors?.[this.skin.frame(asset,key)];if(anchor){anchorX=anchor[0];anchorY=anchor[1];}}
-    const top=y0+(y1-y0)*slice[0],bottom=y0+(y1-y0)*slice[1],c=Math.cos(angle),s=Math.sin(angle),vertices=[];
-    const nx=key.startsWith('character-')?5:1,ny=key.startsWith('character-')?5:1;
-    const vertex=(u,v)=>{const [dx,dy]=this.skin.offset(key,u,v,w,h,asset);const lx=((u-anchorX)*w+dx)*(flip?-1:1),ly=(v-anchorY)*h+dy;return [x+lx*c-ly*s,y+(lx*s+ly*c)*projection,(x0+u*(x1-x0))/asset.width,(top+v*(bottom-top))/asset.height];};
-    const grid=[];for(let row=0;row<=ny;row++)for(let col=0;col<=nx;col++)grid.push(vertex(col/nx,row/ny));
-    for(let row=0;row<ny;row++)for(let col=0;col<nx;col++){const i=row*(nx+1)+col;for(const j of [i,i+1,i+nx+2,i,i+nx+2,i+nx+1])vertices.push(...grid[j]);}
+    const top=y0+(y1-y0)*slice[0],bottom=y0+(y1-y0)*slice[1],c=Math.cos(angle),s=Math.sin(angle);
+    const character=key.startsWith('character-'),nx=character?5:1,ny=character?5:1;
+    const grid=this.vertexGrid,vertices=character?this.meshVertices:this.quadVertices;
+    let g=0;
+    for(let row=0;row<=ny;row++)for(let col=0;col<=nx;col++){
+      const u=col/nx,v=row/ny;
+      const offset=character?this.skin.offset(key,u,v,w,h,asset):null;
+      const lx=((u-anchorX)*w+(offset?offset[0]:0))*(flip?-1:1),ly=(v-anchorY)*h+(offset?offset[1]:0);
+      grid[g++]=x+lx*c-ly*s;grid[g++]=y+(lx*s+ly*c)*projection;
+      grid[g++]=(x0+u*(x1-x0))/asset.width;grid[g++]=(top+v*(bottom-top))/asset.height;
+    }
+    let out=0;
+    for(let row=0;row<ny;row++)for(let col=0;col<nx;col++){
+      const i=row*(nx+1)+col;
+      for(let corner=0;corner<6;corner++){
+        const j=(corner===0||corner===3?i:corner===1?i+1:corner===5?i+nx+1:i+nx+2)*4;
+        vertices[out++]=grid[j];vertices[out++]=grid[j+1];vertices[out++]=grid[j+2];vertices[out++]=grid[j+3];
+      }
+    }
     gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,asset.texture);gl.uniform1f(this.occlusionMode,asset.occlusionMask?1:0);gl.uniform1f(this.opacity,opacity);
     gl.uniform1f(this.lightTime,this.skin.reduced?0:this.skin.time);gl.uniform1f(this.lightReaction,this.skin.reduced?0:this.skin.reaction);gl.uniform1f(this.ballSurface,key==='ball'?1:0);gl.uniform1f(this.brightness,brightness);gl.uniform1f(this.shadowMode,shadow?1:0);gl.uniform2f(this.blur,softness/w*(x1-x0)/asset.width,softness/h*(bottom-top)/asset.height);
-    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(vertices),gl.DYNAMIC_DRAW);gl.drawArrays(gl.TRIANGLES,0,vertices.length/4);
+    gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.DYNAMIC_DRAW);gl.drawArrays(gl.TRIANGLES,0,vertices.length/4);
   }
 }
 globalThis.SpriteRenderer=SpriteRenderer;

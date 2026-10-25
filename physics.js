@@ -131,14 +131,18 @@
       for(let step=0;step<steps;step++){
         this.time+=h;
         this.updateFlippers(flippers,keys,h);
+        // Each rigid flipper has one geometry for this shared substep.
+        const flipperShapes=balls.length?flippers.map(f=>{
+          const end=[f.x+Math.cos(f.a)*f.length,f.y+Math.sin(f.a)*f.length];
+          return {edges:[[[f.x,f.y],end]],radius:f.radius,restitution:.68,friction:.24,lastHit:f.lastHit??-Infinity};
+        }):[];
         for(const ball of balls){select(ball);
         ball.vy+=this.gravity*h;
         const loss=Math.exp(-this.drag*h);ball.vx*=loss;ball.vy*=loss;ball.omega=(ball.omega||0)*Math.exp(-.35*h);
         this.move(ball,h);
         for(let pass=0;pass<3;pass++){
-          for(const f of flippers){
-            const end=[f.x+Math.cos(f.a)*f.length,f.y+Math.sin(f.a)*f.length];
-            const shape={edges:[[[f.x,f.y],end]],radius:f.radius,restitution:.68,friction:.24,lastHit:f.lastHit??-Infinity};
+          for(let fi=0;fi<flippers.length;fi++){
+            const f=flippers[fi],shape=flipperShapes[fi];
             this.resolve(ball,shape,c=>({vx:-f.omega*(c.y+c.ny*f.radius-f.y),vy:f.omega*(c.x+c.nx*f.radius-f.x)}));
             f.lastHit=shape.lastHit;
           }

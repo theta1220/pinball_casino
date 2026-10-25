@@ -307,7 +307,8 @@ function physics(dt){
  syncGo();
 }
 $('debug').onclick=()=>{debugPhysics=!debugPhysics;$('debug').setAttribute('aria-pressed',String(debugPhysics));};
-function render(dt){
+let renderSubmissions=0;
+function render(dt){renderSubmissions++;
  const dpr=Math.min(devicePixelRatio||1,2),width=Math.round(canvas.clientWidth*dpr),height=Math.round(canvas.clientHeight*dpr);
  if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
  gl.viewport(0,0,width,height);gl.clearColor(.02,.1,.08,1);gl.clear(gl.COLOR_BUFFER_BIT);if(!ready)return;
@@ -389,6 +390,7 @@ requestAnimationFrame(probeFrame);
 if(typeof PerformanceObserver!=='undefined'){try{const observer=new PerformanceObserver(list=>{for(const e of list.getEntries())probe.tasks.push({start:+e.startTime.toFixed(1),duration:+e.duration.toFixed(1)});probe.tasks=probe.tasks.slice(-100);});observer.observe({type:'longtask',buffered:true});probe.supported=true;}catch{}}
 for(const event of ['focus','blur','pageshow','pagehide'])window.addEventListener(event,()=>{probe.events.push({event,time:performance.now(),hidden:!!document.hidden,focused:document.hasFocus?.()??null});probe.events=probe.events.slice(-20);});
 const frameCosts=[],frameIntervals=[];let perfLast=0,perfMode=null;
+let frozenRenderKey=null;
 function frame(now){
  const workStart=performance.now();const currentPerfMode=!!(auto?.running&&$('autoFastTest')?.checked);if(currentPerfMode!==perfMode){frameCosts.length=frameIntervals.length=0;perfMode=currentPerfMode;}
  cues?.update({state,collected:rules.collected,returned:lastLaunchReturned,auto:!!auto?.running,reduced:!!feedback?.reduced,charging});
@@ -398,9 +400,15 @@ function frame(now){
  if(auto?.running&&$('autoFastTest')?.checked){if(study?.current)study.current.executionMode='fixed-step-browser-test';for(let frame=0;frame<60&&auto.running&&state!=='paused';frame++){for(let step=0;step<4;step++)physics(1/240);updatePresentation(1/60);}}
  else{acc+=dt;while(acc>=1/240){physics(1/240);acc-=1/240;}updatePresentation(dt);}}
  
- render(state==='paused'||document.hidden?0:dt);
+ // Frozen scenes need a repaint only on entry, resize/DPR, asset load or motion preference change.
+ // Keep RAF/timing bookkeeping alive; never accumulate hidden physics time.
+ if(document.hidden){frozenRenderKey=null;}
+ else if(state==='paused'){
+  const key=[canvas.clientWidth,canvas.clientHeight,devicePixelRatio||1,ready,!!feedback?.reduced].join(':');
+  if(key!==frozenRenderKey){render(0);frozenRenderKey=key;}
+ }else{frozenRenderKey=null;render(dt);}
  if(!document.hidden&&state!=='paused'){frameCosts.push(performance.now()-workStart);frameIntervals.push((now-prevFrameTime)||0);if(frameCosts.length>600){frameCosts.shift();frameIntervals.shift();}}
- prevFrameTime=now;if(now-perfLast>1000){perfLast=now;const quantile=(a,p)=>{const b=[...a].sort((x,y)=>x-y);return b.length?+b[Math.floor((b.length-1)*p)].toFixed(2):null;};const node=$('performanceReport');if(node)node.textContent=JSON.stringify({build:'2026-10-25-roulette-art-boundaries-v2',version:'go-ammo-v3+stake-v1',exactTotals:{score,best,ammo:balls,bets:{...rules.bets},spinMultiplier:rules.multiplier},multiball:{ammoStock:balls,goReservations:goReservations,goLaunched:goLaunched,ammoAwarded,live:liveBalls.length,peak:peakLive,contacts:world.ballContacts||0,cap:MAX_LIVE_BALLS,ids:liveBalls.map(b=>b.id),selectedStake,stakes:liveBalls.map(b=>({id:b.id,stake:b.stakeMultiplier})),reservedStakes:goStakes.map(r=>r.stake),stakeHistory,settlementHistory},characterEvent:art?.skin?.eventReport?.()??null,cadence:{source:'requestAnimationFrame timestamp differences, not screenshot polling',focused:document.hasFocus?.()??null,visibility:document.visibilityState??null,independentSamples:probe.raf.length,independentMedianMs:quantile(probe.raf,.5),independentP95Ms:quantile(probe.raf,.95),longTaskSupported:probe.supported,longTasks:probe.tasks,events:probe.events,elapsedMs:Math.round(performance.now()-probe.started)},samples:frameCosts.length,workMedianMs:quantile(frameCosts,.5),workP95Ms:quantile(frameCosts,.95),intervalMedianMs:quantile(frameIntervals,.5),intervalP95Ms:quantile(frameIntervals,.95),state,fastTest:perfMode,auto:auto?{running:auto.running,reason:auto.reason,completed:auto.completed,history:auto.history}:null,skinTime:art?.skin?.time,reduced:!!feedback?.reduced,hidden:!!document.hidden},null,2);}
+ prevFrameTime=now;if(now-perfLast>1000){perfLast=now;const quantile=(a,p)=>{const b=[...a].sort((x,y)=>x-y);return b.length?+b[Math.floor((b.length-1)*p)].toFixed(2):null;};const node=$('performanceReport');if(node)node.textContent=JSON.stringify({build:'2026-10-25-atlas-continuity-performance-v3',renderSubmissions,version:'go-ammo-v3+stake-v1',exactTotals:{score,best,ammo:balls,bets:{...rules.bets},spinMultiplier:rules.multiplier},multiball:{ammoStock:balls,goReservations:goReservations,goLaunched:goLaunched,ammoAwarded,live:liveBalls.length,peak:peakLive,contacts:world.ballContacts||0,cap:MAX_LIVE_BALLS,ids:liveBalls.map(b=>b.id),selectedStake,stakes:liveBalls.map(b=>({id:b.id,stake:b.stakeMultiplier})),reservedStakes:goStakes.map(r=>r.stake),stakeHistory,settlementHistory},characterEvent:art?.skin?.eventReport?.()??null,cadence:{source:'requestAnimationFrame timestamp differences, not screenshot polling',focused:document.hasFocus?.()??null,visibility:document.visibilityState??null,independentSamples:probe.raf.length,independentMedianMs:quantile(probe.raf,.5),independentP95Ms:quantile(probe.raf,.95),longTaskSupported:probe.supported,longTasks:probe.tasks,events:probe.events,elapsedMs:Math.round(performance.now()-probe.started)},samples:frameCosts.length,workMedianMs:quantile(frameCosts,.5),workP95Ms:quantile(frameCosts,.95),intervalMedianMs:quantile(frameIntervals,.5),intervalP95Ms:quantile(frameIntervals,.95),state,fastTest:perfMode,auto:auto?{running:auto.running,reason:auto.reason,completed:auto.completed,history:auto.history}:null,skinTime:art?.skin?.time,reduced:!!feedback?.reduced,hidden:!!document.hidden},null,2);}
  requestAnimationFrame(frame);
 }
 syncGo();requestAnimationFrame(frame);

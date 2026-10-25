@@ -184,3 +184,7 @@ The safe area includes both inset-safe controls and visually continuous scenic c
 
 ## Numeric atlas update continuity
 HUD value writes preserve existing atlas run/canvas and repaint changed semantic/raster text synchronously, before the next paint. Never remove a rich canvas and defer reconstruction through MutationObserver plus requestAnimationFrame. Cache identical formatted text only; arithmetic stays exact and immediate. Test zero recovery, digit-width/K/M/G boundaries, stake labels, hidden/reopen, resize and unloaded fallback. Distinguish lifecycle models from browser pixels; retain gold glyph and nine-slice readability.
+
+
+## Performance and device-heat evidence
+Remove redundant paused/hidden scene draws, unchanged DOM writes and transient vertex/rigid-geometry allocations before reducing fidelity. Preserve physics/contact order, rewards, authored12FPS poses and vivid effects. Validate render invalidation on pause entry, visibility return, resize/DPR, assets and motion preference. Compare paired inputs and separate CPU/allocation/submission measurements from GPU timing, RAF cadence and actual temperature. Mock/CPU workload savings are not thermal measurements. Keep explicit tests for numeric continuity after integration; candidate folders never ship.
